@@ -1,0 +1,9 @@
+{
+  "name": "ai-english-practice-root",
+  "version": "1.0.0",
+  "description": "Root configuration for Render deployment",
+  "scripts": {
+    "build": "cd client && npm install && npm run build && cd ../server && npm install",
+    "start": "node server/index.js"
+  }
+}
