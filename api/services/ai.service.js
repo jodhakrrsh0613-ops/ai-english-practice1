@@ -12,22 +12,15 @@ Rules:
   "explanation": "Brief explanation of the mistake or translation if Hindi was used, or null"
 }`;
 
-async function callGemini(apiKey, contents, systemInstruction = null) {
-  const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
+async function callGemini(apiKey, contents) {
+  const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
   
   const body = {
     contents: contents,
     generationConfig: {
-      responseMimeType: "application/json",
       temperature: 0.7
     }
   };
-
-  if (systemInstruction) {
-    body.systemInstruction = {
-      parts: [{ text: systemInstruction }]
-    };
-  }
 
   const response = await fetch(url, {
     method: 'POST',
@@ -41,7 +34,10 @@ async function callGemini(apiKey, contents, systemInstruction = null) {
   }
 
   const data = await response.json();
-  return data.candidates[0].content.parts[0].text;
+  const text = data.candidates[0].content.parts[0].text;
+  
+  // Clean JSON response (sometimes AI adds markdown code blocks)
+  return text.replace(/```json/g, '').replace(/```/g, '').trim();
 }
 
 export async function handleChat(message, history, clientApiKey) {
@@ -66,11 +62,13 @@ export async function handleChat(message, history, clientApiKey) {
     });
 
     const contents = [
+      { role: 'user', parts: [{ text: "SYSTEM INSTRUCTION: " + SYSTEM_PROMPT }] },
+      { role: 'model', parts: [{ text: "I understand. I will act as your English tutor and respond only in the JSON format you specified." }] },
       ...formattedHistory,
       { role: 'user', parts: [{ text: message }] }
     ];
 
-    const resultText = await callGemini(apiKey, contents, SYSTEM_PROMPT);
+    const resultText = await callGemini(apiKey, contents);
     return JSON.parse(resultText);
   } catch (error) {
     console.error("AI Service Error:", error);
@@ -85,7 +83,8 @@ export async function handleChat(message, history, clientApiKey) {
 export async function getFeedback(history, clientApiKey) {
   try {
     const apiKey = clientApiKey || process.env.GEMINI_API_KEY;
-    const prompt = `Analyze the conversation and provide feedback in JSON format: { "strengths": [], "mistakes": [], "suggestions": [] }.
+    const prompt = `Analyze the conversation and provide feedback in JSON format: { "strengths": [], "mistakes": [], "suggestions": [] }. 
+    Important: Reply ONLY with the JSON object.
     History: ${JSON.stringify(history)}`;
 
     const resultText = await callGemini(apiKey, [{ role: 'user', parts: [{ text: prompt }] }]);
@@ -98,7 +97,8 @@ export async function getFeedback(history, clientApiKey) {
 export async function checkGrammar(text, clientApiKey) {
   try {
     const apiKey = clientApiKey || process.env.GEMINI_API_KEY;
-    const prompt = `Correct this text and explain in JSON: { "corrected": "", "corrections": [{ "wrong": "", "correct": "", "explanation": "" }] }.
+    const prompt = `Correct this text and explain in JSON: { "corrected": "", "corrections": [{ "wrong": "", "correct": "", "explanation": "" }] }. 
+    Important: Reply ONLY with the JSON object.
     Text: "${text}"`;
 
     const resultText = await callGemini(apiKey, [{ role: 'user', parts: [{ text: prompt }] }]);
@@ -111,7 +111,8 @@ export async function checkGrammar(text, clientApiKey) {
 export async function getVocabulary(clientApiKey) {
   try {
     const apiKey = clientApiKey || process.env.GEMINI_API_KEY;
-    const prompt = `Provide 5 vocab words in JSON array: [{ "word": "", "type": "", "meaning": "", "example": "" }]`;
+    const prompt = `Provide 5 vocab words in JSON array: [{ "word": "", "type": "", "meaning": "", "example": "" }]. 
+    Important: Reply ONLY with the JSON array.`;
 
     const resultText = await callGemini(apiKey, [{ role: 'user', parts: [{ text: prompt }] }]);
     return JSON.parse(resultText);
