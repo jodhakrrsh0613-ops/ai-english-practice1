@@ -12,8 +12,44 @@ Rules:
   "explanation": "Brief explanation of the mistake or translation if Hindi was used, or null"
 }`;
 
-async function callGemini(apiKey, contents, retryWithPro = true) {
-  // Using official latest aliases
+async function callGroq(apiKey, contents) {
+  const url = "https://api.groq.com/openai/v1/chat/completions";
+  
+  // Convert Gemini history format to OpenAI/Groq format
+  const messages = contents.map(c => ({
+    role: c.role === 'model' ? 'assistant' : 'user',
+    content: Array.isArray(c.parts) ? c.parts[0].text : c.parts
+  }));
+
+  const body = {
+    model: "llama-3.3-70b-versatile",
+    messages: [
+      { role: "system", content: SYSTEM_PROMPT },
+      ...messages
+    ],
+    response_format: { type: "json_object" },
+    temperature: 0.7
+  };
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error?.message || "Groq API error");
+  }
+
+  const data = await response.json();
+  return data.choices[0].message.content;
+}
+
+async function callGemini(apiKey, contents) {
   const modelName = "gemini-flash-latest";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
   
@@ -22,48 +58,15 @@ async function callGemini(apiKey, contents, retryWithPro = true) {
     generationConfig: { temperature: 0.7 }
   };
 
-  try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      const errorMsg = errorData.error?.message || "Connection failed";
-
-      // If quota exceeded and we haven't tried Pro yet, try Gemini Pro
-      if (response.status === 429 && retryWithPro) {
-        console.log("Switching to Gemini Pro due to rate limit...");
-        return await callGeminiWithModel(apiKey, contents, "gemini-pro-latest");
-      }
-      
-      throw new Error(errorMsg);
-    }
-
-    const data = await response.json();
-    const text = data.candidates[0].content.parts[0].text;
-    return text.replace(/```json/g, '').replace(/```/g, '').trim();
-  } catch (error) {
-    if (retryWithPro && !error.message.includes("API Key missing")) {
-       return await callGeminiWithModel(apiKey, contents, "gemini-pro-latest");
-    }
-    throw error;
-  }
-}
-
-async function callGeminiWithModel(apiKey, contents, modelName) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
   const response = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ contents, generationConfig: { temperature: 0.7 } })
+    body: JSON.stringify(body)
   });
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.error?.message || `Failed with ${modelName}`);
+    throw new Error(errorData.error?.message || "Gemini connection failed");
   }
 
   const data = await response.json();
@@ -73,37 +76,35 @@ async function callGeminiWithModel(apiKey, contents, modelName) {
 
 export async function handleChat(message, history, clientApiKey) {
   try {
-    const apiKey = clientApiKey || process.env.GEMINI_API_KEY;
-    if (!apiKey || apiKey === 'your_gemini_api_key_here') {
-      return { reply: "API Key missing.", correction: null, explanation: null };
+    const groqKey = process.env.GROQ_API_KEY;
+    const geminiKey = clientApiKey || process.env.GEMINI_API_KEY;
+
+    let resultText;
+    // Prefer Groq if available
+    if (groqKey && groqKey !== 'your_groq_api_key_here') {
+      const contents = [
+        ...history.map(h => ({ role: h.role, parts: h.content })),
+        { role: 'user', parts: message }
+      ];
+      resultText = await callGroq(groqKey, contents);
+    } else {
+      const formattedHistory = history.map(msg => ({
+        role: msg.role === 'user' ? 'user' : 'model',
+        parts: [{ text: msg.content }]
+      }));
+      const contents = [
+        ...formattedHistory,
+        { role: 'user', parts: [{ text: "SYSTEM INSTRUCTION: " + SYSTEM_PROMPT }] },
+        { role: 'user', parts: [{ text: message }] }
+      ];
+      resultText = await callGemini(geminiKey, contents);
     }
 
-    const formattedHistory = history.map(msg => {
-      let textContent = msg.content;
-      if (msg.role === 'model') {
-        try {
-          const parsed = JSON.parse(msg.content);
-          textContent = JSON.stringify(parsed);
-        } catch (e) { }
-      }
-      return {
-        role: msg.role === 'user' ? 'user' : 'model',
-        parts: [{ text: textContent }]
-      };
-    });
-
-    const contents = [
-      ...formattedHistory,
-      { role: 'user', parts: [{ text: "SYSTEM INSTRUCTION: " + SYSTEM_PROMPT }] },
-      { role: 'user', parts: [{ text: message }] }
-    ];
-
-    const resultText = await callGemini(apiKey, contents);
     return JSON.parse(resultText);
   } catch (error) {
     console.error("AI Service Error:", error);
     return {
-      reply: `Error: ${error.message}`,
+      reply: `Error: ${error.message}. Please check your API keys.`,
       correction: null,
       explanation: null
     };
@@ -112,9 +113,15 @@ export async function handleChat(message, history, clientApiKey) {
 
 export async function getFeedback(history, clientApiKey) {
   try {
-    const apiKey = clientApiKey || process.env.GEMINI_API_KEY;
+    const groqKey = process.env.GROQ_API_KEY;
     const prompt = `Analyze the conversation and provide feedback in JSON format: { "strengths": [], "mistakes": [], "suggestions": [] }. History: ${JSON.stringify(history)}`;
-    const resultText = await callGemini(apiKey, [{ role: 'user', parts: [{ text: prompt }] }]);
+    
+    let resultText;
+    if (groqKey) {
+      resultText = await callGroq(groqKey, [{ role: 'user', parts: prompt }]);
+    } else {
+      resultText = await callGemini(clientApiKey || process.env.GEMINI_API_KEY, [{ role: 'user', parts: [{ text: prompt }] }]);
+    }
     return JSON.parse(resultText);
   } catch (err) {
     return { strengths: [], mistakes: [], suggestions: [`Error: ${err.message}`] };
@@ -123,9 +130,15 @@ export async function getFeedback(history, clientApiKey) {
 
 export async function checkGrammar(text, clientApiKey) {
   try {
-    const apiKey = clientApiKey || process.env.GEMINI_API_KEY;
+    const groqKey = process.env.GROQ_API_KEY;
     const prompt = `Correct this text and explain in JSON: { "corrected": "", "corrections": [{ "wrong": "", "correct": "", "explanation": "" }] }. Text: "${text}"`;
-    const resultText = await callGemini(apiKey, [{ role: 'user', parts: [{ text: prompt }] }]);
+    
+    let resultText;
+    if (groqKey) {
+      resultText = await callGroq(groqKey, [{ role: 'user', parts: prompt }]);
+    } else {
+      resultText = await callGemini(clientApiKey || process.env.GEMINI_API_KEY, [{ role: 'user', parts: [{ text: prompt }] }]);
+    }
     return JSON.parse(resultText);
   } catch (err) {
     return { corrected: text, corrections: [], explanation: `Error: ${err.message}` };
@@ -134,9 +147,15 @@ export async function checkGrammar(text, clientApiKey) {
 
 export async function getVocabulary(clientApiKey) {
   try {
-    const apiKey = clientApiKey || process.env.GEMINI_API_KEY;
+    const groqKey = process.env.GROQ_API_KEY;
     const prompt = `Provide 5 vocab words in JSON array: [{ "word": "", "type": "", "meaning": "", "example": "" }]`;
-    const resultText = await callGemini(apiKey, [{ role: 'user', parts: [{ text: prompt }] }]);
+    
+    let resultText;
+    if (groqKey) {
+      resultText = await callGroq(groqKey, [{ role: 'user', parts: prompt }]);
+    } else {
+      resultText = await callGemini(clientApiKey || process.env.GEMINI_API_KEY, [{ role: 'user', parts: [{ text: prompt }] }]);
+    }
     return JSON.parse(resultText);
   } catch (err) {
     return [{ word: "Error", type: "error", meaning: err.message, example: "" }];
