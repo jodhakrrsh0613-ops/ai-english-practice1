@@ -13,8 +13,8 @@ Rules:
 }`;
 
 async function callGemini(apiKey, contents) {
-  // Using gemini-2.0-flash as confirmed by diagnostic results
-  const modelName = "gemini-2.0-flash";
+  // Using gemini-flash-latest to ensure it works with the free tier quota
+  const modelName = "gemini-flash-latest";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
   
   const body = {
