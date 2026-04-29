@@ -31,13 +31,18 @@ function MessageBubble({ message }) {
 
   return (
     <div className={`message-wrapper ${isUser ? 'user' : 'ai'}`}>
+      {!isUser && (
+        <div className="avatar ai-avatar">
+          <span>AI</span>
+        </div>
+      )}
       <div className="message-bubble">
         <div className="msg-content">{content}</div>
         
         {!isUser && (
           <div className="msg-actions">
             <button className="btn-icon" onClick={handleSpeak} title="Listen">
-              <Volume2 size={16} />
+              <Volume2 size={18} />
             </button>
           </div>
         )}
@@ -45,7 +50,7 @@ function MessageBubble({ message }) {
         {!isUser && correction && (
           <div className="correction-box">
             <div className="corr-title">
-              <AlertCircle size={14} /> Correction
+              <AlertCircle size={16} /> Tutor Tip
             </div>
             <div className="corr-text">{correction}</div>
             {explanation && <div className="corr-expl">{explanation}</div>}

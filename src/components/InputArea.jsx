@@ -63,29 +63,33 @@ function InputArea({ onSend, disabled }) {
 
   return (
     <div className="input-area">
-      <button 
-        className={`btn-mic ${isRecording ? 'recording' : ''}`} 
-        onClick={toggleRecording}
-        disabled={disabled}
-        title="Voice Input"
-      >
-        <Mic size={20} />
-      </button>
       <input 
         type="text" 
-        placeholder="Type a message or click mic to speak..." 
+        placeholder="Type a message or tap mic to speak..." 
         value={text}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={handleKeyDown}
         disabled={disabled}
       />
-      <button 
-        className="btn-send" 
-        onClick={handleSend}
-        disabled={!text.trim() || disabled}
-      >
-        <Send size={20} />
-      </button>
+      
+      {text.trim() ? (
+        <button 
+          className="btn-send" 
+          onClick={handleSend}
+          disabled={disabled}
+        >
+          <Send size={22} />
+        </button>
+      ) : (
+        <button 
+          className={`btn-mic ${isRecording ? 'recording' : ''}`} 
+          onClick={toggleRecording}
+          disabled={disabled}
+          title="Voice Input"
+        >
+          <Mic size={24} />
+        </button>
+      )}
     </div>
   );
 }
