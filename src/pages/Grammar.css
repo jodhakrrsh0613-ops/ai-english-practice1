@@ -36,6 +36,7 @@
   outline: none;
   transition: all 0.2s;
   background: #f8fafc;
+  color: #1e293b;
 }
 
 .input-section textarea:focus {
