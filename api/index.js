@@ -1,9 +1,9 @@
-const express = require('express');
-const cors = require('cors');
-const dotenv = require('dotenv');
-dotenv.config();
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import { handleChat, getFeedback, checkGrammar, getVocabulary } from './services/ai.service.js';
 
-const { handleChat, getFeedback, checkGrammar, getVocabulary } = require('./services/ai.service');
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -16,7 +16,6 @@ app.post('/api/chat', async (req, res) => {
     const { message, history } = req.body;
     const clientApiKey = req.headers['x-api-key'];
     
-    // Process chat directly without database
     const response = await handleChat(message, history || [], clientApiKey);
     res.json(response);
     
@@ -31,7 +30,6 @@ app.post('/api/feedback', async (req, res) => {
     const { history } = req.body;
     const clientApiKey = req.headers['x-api-key'];
     
-    // Process feedback directly without database
     const feedback = await getFeedback(history || [], clientApiKey);
     res.json(feedback);
     
@@ -64,10 +62,9 @@ app.get('/api/vocabulary', async (req, res) => {
   }
 });
 
-// Export the Express API for Vercel Serverless
-module.exports = app;
+// Export the Express API for Vercel
+export default app;
 
-// Listen only if not in Vercel environment (optional but good practice)
 if (process.env.NODE_ENV !== 'production' || process.env.PORT) {
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

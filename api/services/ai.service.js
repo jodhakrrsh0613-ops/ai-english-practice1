@@ -1,4 +1,4 @@
-const { GoogleGenAI } = require('@google/generative-ai');
+import { GoogleGenAI } from '@google/generative-ai';
 
 const SYSTEM_PROMPT = `You are an English speaking practice assistant. You talk to users in simple English, correct their mistakes, explain briefly, and ask engaging questions to improve their speaking skills.
 
@@ -14,7 +14,7 @@ Rules:
   "explanation": "Brief explanation of the mistake or translation if Hindi was used, or null"
 }`;
 
-async function handleChat(message, history, clientApiKey) {
+export async function handleChat(message, history, clientApiKey) {
   try {
     const apiKey = clientApiKey || process.env.GEMINI_API_KEY;
     if (!apiKey || apiKey === 'your_gemini_api_key_here') {
@@ -68,7 +68,7 @@ async function handleChat(message, history, clientApiKey) {
   }
 }
 
-async function getFeedback(history, clientApiKey) {
+export async function getFeedback(history, clientApiKey) {
   try {
     const apiKey = clientApiKey || process.env.GEMINI_API_KEY;
     if (!apiKey || apiKey === 'your_gemini_api_key_here') {
@@ -108,7 +108,7 @@ ${history.map(h => {
   }
 }
 
-async function checkGrammar(text, clientApiKey) {
+export async function checkGrammar(text, clientApiKey) {
   try {
     const apiKey = clientApiKey || process.env.GEMINI_API_KEY;
     if (!apiKey || apiKey === 'your_gemini_api_key_here') {
@@ -148,7 +148,7 @@ Text to check:
   }
 }
 
-async function getVocabulary(clientApiKey) {
+export async function getVocabulary(clientApiKey) {
   try {
     const apiKey = clientApiKey || process.env.GEMINI_API_KEY;
     if (!apiKey || apiKey === 'your_gemini_api_key_here') {
@@ -183,5 +183,3 @@ Return the result as a JSON array of objects:
     return [{ word: "Error", type: "error", meaning: `Could not fetch vocabulary: ${err.message || 'Unknown error'}`, example: "" }];
   }
 }
-
-module.exports = { handleChat, getFeedback, checkGrammar, getVocabulary };
