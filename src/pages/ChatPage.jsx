@@ -40,7 +40,25 @@ function ChatPage() {
         body: JSON.stringify({ message: text, history: messages })
       });
       const data = await response.json();
-      setMessages(prev => [...prev, { role: 'model', content: JSON.stringify(data) }]);
+      
+      // Handle Rate Limits (Quota Exceeded)
+      if (data.reply && data.reply.toString().includes("exceeded your current quota")) {
+        const quotaMsg = {
+          role: 'model',
+          content: JSON.stringify({
+            reply: "I'm taking a short break! 😅 Please wait about 30-60 seconds and then try sending your message again. The free version has a small limit per minute.",
+            correction: null,
+            explanation: null
+          })
+        };
+        setMessages(prev => [...prev, quotaMsg]);
+      } else {
+        const assistantMsg = {
+          role: 'model',
+          content: JSON.stringify(data)
+        };
+        setMessages(prev => [...prev, assistantMsg]);
+      }
     } catch (error) {
       console.error("Error sending message:", error);
       setMessages(prev => [...prev, { role: 'model', content: JSON.stringify({ reply: "Sorry, I'm having trouble connecting to the server.", correction: null, explanation: null }) }]);
