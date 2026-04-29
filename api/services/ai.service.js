@@ -1,4 +1,7 @@
-import { GoogleGenAI } from '@google/generative-ai';
+import * as sdk from '@google/generative-ai';
+
+// Defensive way to get the constructor
+const GoogleGenAI = sdk.GoogleGenAI || (sdk.default && sdk.default.GoogleGenAI) || sdk.default;
 
 const SYSTEM_PROMPT = `You are an English speaking practice assistant. You talk to users in simple English, correct their mistakes, explain briefly, and ask engaging questions to improve their speaking skills.
 
@@ -24,6 +27,11 @@ export async function handleChat(message, history, clientApiKey) {
         explanation: null
       };
     }
+    
+    if (typeof GoogleGenAI !== 'function') {
+        throw new Error("AI SDK failed to load correctly. Please redeploy.");
+    }
+
     const genAI = new GoogleGenAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
