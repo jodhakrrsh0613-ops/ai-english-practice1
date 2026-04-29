@@ -56,17 +56,19 @@ function Vocabulary() {
                     <Volume2 size={18} />
                   </button>
                 </div>
-                  </div>
+                <h2 className="word-title">{item.word}</h2>
+                <p className="word-meaning">{item.meaning}</p>
+                <div className="word-example">
+                  <span className="label">Example:</span>
+                  <p>"{item.example}"</p>
                 </div>
+                <button className="btn-add-list">
+                  <Plus size={16} />
+                  <span>Add to My List</span>
+                </button>
               </div>
-            ))}
-          </div>
-        )}
-        
-        <div className="vocab-actions">
-          <button className="btn-primary" onClick={fetchVocab} disabled={isLoading}>
-            {isLoading ? 'Loading...' : 'Get New Words'}
-          </button>
+            ))
+          )}
         </div>
       </div>
     </div>
