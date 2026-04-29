@@ -12,41 +12,58 @@ Rules:
   "explanation": "Brief explanation of the mistake or translation if Hindi was used, or null"
 }`;
 
-async function callGemini(apiKey, contents) {
-  // Using gemini-flash-latest to ensure it works with the free tier quota
-  const modelName = "gemini-flash-latest";
+async function callGemini(apiKey, contents, retryWithPro = true) {
+  // Try Gemini 1.5 Flash first
+  const modelName = "gemini-1.5-flash";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
   
   const body = {
     contents: contents,
-    generationConfig: {
-      temperature: 0.7
-    }
+    generationConfig: { temperature: 0.7 }
   };
 
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      const errorMsg = errorData.error?.message || "Connection failed";
+
+      // If quota exceeded and we haven't tried Pro yet, try Gemini Pro
+      if (response.status === 429 && retryWithPro) {
+        console.log("Switching to Gemini Pro due to rate limit...");
+        return await callGeminiWithModel(apiKey, contents, "gemini-pro");
+      }
+      
+      throw new Error(errorMsg);
+    }
+
+    const data = await response.json();
+    const text = data.candidates[0].content.parts[0].text;
+    return text.replace(/```json/g, '').replace(/```/g, '').trim();
+  } catch (error) {
+    if (retryWithPro && !error.message.includes("API Key missing")) {
+       return await callGeminiWithModel(apiKey, contents, "gemini-pro");
+    }
+    throw error;
+  }
+}
+
+async function callGeminiWithModel(apiKey, contents, modelName) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
   const response = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
+    body: JSON.stringify({ contents, generationConfig: { temperature: 0.7 } })
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    let errorMsg = error.error?.message || "Connection failed";
-    
-    // If model not found, try to list available models to help the user
-    if (response.status === 404) {
-        try {
-            const listUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
-            const listRes = await fetch(listUrl);
-            const listData = await listRes.json();
-            const models = listData.models?.map(m => m.name.replace('models/', '')).join(', ');
-            errorMsg = `Model ${modelName} not found. Your available models are: ${models || 'None found'}. Please check if Generative Language API is enabled in Google Cloud Console.`;
-        } catch (e) {
-            errorMsg = "Model not found and could not list alternatives. Please verify your API Key and Project settings.";
-        }
-    }
-    throw new Error(errorMsg);
+    const errorData = await response.json();
+    throw new Error(errorData.error?.message || `Failed with ${modelName}`);
   }
 
   const data = await response.json();
@@ -96,9 +113,7 @@ export async function handleChat(message, history, clientApiKey) {
 export async function getFeedback(history, clientApiKey) {
   try {
     const apiKey = clientApiKey || process.env.GEMINI_API_KEY;
-    const prompt = `Analyze the conversation and provide feedback in JSON format: { "strengths": [], "mistakes": [], "suggestions": [] }. 
-    History: ${JSON.stringify(history)}`;
-
+    const prompt = `Analyze the conversation and provide feedback in JSON format: { "strengths": [], "mistakes": [], "suggestions": [] }. History: ${JSON.stringify(history)}`;
     const resultText = await callGemini(apiKey, [{ role: 'user', parts: [{ text: prompt }] }]);
     return JSON.parse(resultText);
   } catch (err) {
@@ -109,9 +124,7 @@ export async function getFeedback(history, clientApiKey) {
 export async function checkGrammar(text, clientApiKey) {
   try {
     const apiKey = clientApiKey || process.env.GEMINI_API_KEY;
-    const prompt = `Correct this text and explain in JSON: { "corrected": "", "corrections": [{ "wrong": "", "correct": "", "explanation": "" }] }. 
-    Text: "${text}"`;
-
+    const prompt = `Correct this text and explain in JSON: { "corrected": "", "corrections": [{ "wrong": "", "correct": "", "explanation": "" }] }. Text: "${text}"`;
     const resultText = await callGemini(apiKey, [{ role: 'user', parts: [{ text: prompt }] }]);
     return JSON.parse(resultText);
   } catch (err) {
@@ -123,7 +136,6 @@ export async function getVocabulary(clientApiKey) {
   try {
     const apiKey = clientApiKey || process.env.GEMINI_API_KEY;
     const prompt = `Provide 5 vocab words in JSON array: [{ "word": "", "type": "", "meaning": "", "example": "" }]`;
-
     const resultText = await callGemini(apiKey, [{ role: 'user', parts: [{ text: prompt }] }]);
     return JSON.parse(resultText);
   } catch (err) {
