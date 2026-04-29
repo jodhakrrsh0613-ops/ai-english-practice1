@@ -1,7 +1,3 @@
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const { GoogleGenAI } = require('@google/generative-ai');
-
 const SYSTEM_PROMPT = `You are an English speaking practice assistant. You talk to users in simple English, correct their mistakes, explain briefly, and ask engaging questions to improve their speaking skills.
 
 Rules:
@@ -16,25 +12,44 @@ Rules:
   "explanation": "Brief explanation of the mistake or translation if Hindi was used, or null"
 }`;
 
+async function callGemini(apiKey, contents, systemInstruction = null) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  
+  const body = {
+    contents: contents,
+    generationConfig: {
+      responseMimeType: "application/json",
+      temperature: 0.7
+    }
+  };
+
+  if (systemInstruction) {
+    body.systemInstruction = {
+      parts: [{ text: systemInstruction }]
+    };
+  }
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error?.message || "Failed to connect to Gemini API");
+  }
+
+  const data = await response.json();
+  return data.candidates[0].content.parts[0].text;
+}
+
 export async function handleChat(message, history, clientApiKey) {
   try {
     const apiKey = clientApiKey || process.env.GEMINI_API_KEY;
     if (!apiKey || apiKey === 'your_gemini_api_key_here') {
-      return {
-        reply: "Please enter your valid Google Gemini API Key in the settings to start chatting.",
-        correction: null,
-        explanation: null
-      };
+      return { reply: "API Key missing.", correction: null, explanation: null };
     }
-    
-    // Final check for the constructor
-    const GenAIClass = GoogleGenAI || require('@google/generative-ai').GoogleGenAI;
-    if (typeof GenAIClass !== 'function') {
-        throw new Error("SDK constructor not found. Please ensure @google/generative-ai is in package.json");
-    }
-
-    const genAI = new GenAIClass(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const formattedHistory = history.map(msg => {
       let textContent = msg.content;
@@ -42,9 +57,7 @@ export async function handleChat(message, history, clientApiKey) {
         try {
           const parsed = JSON.parse(msg.content);
           textContent = JSON.stringify(parsed);
-        } catch (e) {
-          textContent = msg.content;
-        }
+        } catch (e) { }
       }
       return {
         role: msg.role === 'user' ? 'user' : 'model',
@@ -52,25 +65,17 @@ export async function handleChat(message, history, clientApiKey) {
       };
     });
 
-    const chatSession = model.startChat({
-      generationConfig: {
-        responseMimeType: "application/json",
-        temperature: 0.7,
-      },
-      history: [
-        { role: 'user', parts: [{ text: SYSTEM_PROMPT }] },
-        { role: 'model', parts: [{ text: '{"reply": "Understood. I will strictly follow these rules and respond in JSON.", "correction": null, "explanation": null}' }] },
-        ...formattedHistory
-      ],
-    });
+    const contents = [
+      ...formattedHistory,
+      { role: 'user', parts: [{ text: message }] }
+    ];
 
-    const result = await chatSession.sendMessage(message);
-    const response = await result.response;
-    return JSON.parse(response.text());
+    const resultText = await callGemini(apiKey, contents, SYSTEM_PROMPT);
+    return JSON.parse(resultText);
   } catch (error) {
     console.error("AI Service Error:", error);
     return {
-      reply: `Connection error: ${error.message || 'Unknown error'}. Please check if your API key is active and has enough quota.`,
+      reply: `Error: ${error.message}`,
       correction: null,
       explanation: null
     };
@@ -80,118 +85,37 @@ export async function handleChat(message, history, clientApiKey) {
 export async function getFeedback(history, clientApiKey) {
   try {
     const apiKey = clientApiKey || process.env.GEMINI_API_KEY;
-    if (!apiKey || apiKey === 'your_gemini_api_key_here') {
-      return { strengths: [], mistakes: [], suggestions: ["Please configure your API key."] };
-    }
-    const GenAIClass = GoogleGenAI || require('@google/generative-ai').GoogleGenAI;
-    const genAI = new GenAIClass(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const prompt = `Analyze the conversation and provide feedback in JSON format: { "strengths": [], "mistakes": [], "suggestions": [] }.
+    History: ${JSON.stringify(history)}`;
 
-    const prompt = `Analyze the following conversation between a user and an English tutor.
-Provide feedback on the user's performance. Focus on their strengths, mistakes, and suggestions for improvement.
-Return the response as a JSON object with the structure:
-{
-  "strengths": ["list", "of", "strengths"],
-  "mistakes": ["list", "of", "recurring", "mistakes"],
-  "suggestions": ["list", "of", "suggestions"]
-}
-
-Conversation History:
-${history.map(h => {
-    let textContent = h.content;
-    if (h.role === 'model') {
-      try { textContent = JSON.parse(h.content).reply; } catch (e) { }
-    }
-    return `${h.role}: ${textContent}`;
-  }).join('\n')}
-`;
-
-    const result = await model.generateContent({
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: { responseMimeType: "application/json" }
-    });
-    const response = await result.response;
-    return JSON.parse(response.text());
+    const resultText = await callGemini(apiKey, [{ role: 'user', parts: [{ text: prompt }] }]);
+    return JSON.parse(resultText);
   } catch (err) {
-    console.error("Feedback error", err);
-    return { strengths: [], mistakes: [], suggestions: [`Feedback generation failed: ${err.message || 'Unknown error'}`] };
+    return { strengths: [], mistakes: [], suggestions: [`Error: ${err.message}`] };
   }
 }
 
 export async function checkGrammar(text, clientApiKey) {
   try {
     const apiKey = clientApiKey || process.env.GEMINI_API_KEY;
-    if (!apiKey || apiKey === 'your_gemini_api_key_here') {
-        return { corrected: text, corrections: [], explanation: "API Key missing." };
-    }
-    const GenAIClass = GoogleGenAI || require('@google/generative-ai').GoogleGenAI;
-    const genAI = new GenAIClass(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const prompt = `Correct this text and explain in JSON: { "corrected": "", "corrections": [{ "wrong": "", "correct": "", "explanation": "" }] }.
+    Text: "${text}"`;
 
-    const prompt = `Analyze and correct the following English text for grammar, punctuation, and style.
-Return the result as a JSON object with the structure:
-{
-  "corrected": "The full corrected text",
-  "corrections": [
-    {
-      "wrong": "word or phrase",
-      "correct": "corrected word or phrase",
-      "explanation": "why it was wrong"
-    }
-  ]
-}
-
-Text to check:
-"${text}"`;
-
-    const result = await model.generateContent({
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: {
-        responseMimeType: "application/json",
-        temperature: 0.2,
-      }
-    });
-    const response = await result.response;
-    return JSON.parse(response.text());
+    const resultText = await callGemini(apiKey, [{ role: 'user', parts: [{ text: prompt }] }]);
+    return JSON.parse(resultText);
   } catch (err) {
-    console.error("Grammar check error", err);
-    return { corrected: text, corrections: [], explanation: `Grammar check failed: ${err.message || 'Unknown error'}` };
+    return { corrected: text, corrections: [], explanation: `Error: ${err.message}` };
   }
 }
 
 export async function getVocabulary(clientApiKey) {
   try {
     const apiKey = clientApiKey || process.env.GEMINI_API_KEY;
-    if (!apiKey || apiKey === 'your_gemini_api_key_here') {
-        return [];
-    }
-    const GenAIClass = GoogleGenAI || require('@google/generative-ai').GoogleGenAI;
-    const genAI = new GenAIClass(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const prompt = `Provide 5 vocab words in JSON array: [{ "word": "", "type": "", "meaning": "", "example": "" }]`;
 
-    const prompt = `Provide 5 advanced or useful English vocabulary words for a language learner.
-For each word, provide:
-1. The word itself
-2. Part of speech (noun, verb, adj, etc.)
-3. A simple meaning
-4. A clear example sentence
-
-Return the result as a JSON array of objects:
-[
-  { "word": "word", "type": "noun", "meaning": "meaning", "example": "example" }
-]`;
-
-    const result = await model.generateContent({
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: {
-        responseMimeType: "application/json",
-        temperature: 1,
-      }
-    });
-    const response = await result.response;
-    return JSON.parse(response.text());
+    const resultText = await callGemini(apiKey, [{ role: 'user', parts: [{ text: prompt }] }]);
+    return JSON.parse(resultText);
   } catch (err) {
-    console.error("Vocab error", err);
-    return [{ word: "Error", type: "error", meaning: `Could not fetch vocabulary: ${err.message || 'Unknown error'}`, example: "" }];
+    return [{ word: "Error", type: "error", meaning: err.message, example: "" }];
   }
 }
