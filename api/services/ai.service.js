@@ -13,8 +13,8 @@ Rules:
 }`;
 
 async function callGemini(apiKey, contents, retryWithPro = true) {
-  // Try Gemini 1.5 Flash first
-  const modelName = "gemini-1.5-flash";
+  // Using official latest aliases
+  const modelName = "gemini-flash-latest";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
   
   const body = {
@@ -36,7 +36,7 @@ async function callGemini(apiKey, contents, retryWithPro = true) {
       // If quota exceeded and we haven't tried Pro yet, try Gemini Pro
       if (response.status === 429 && retryWithPro) {
         console.log("Switching to Gemini Pro due to rate limit...");
-        return await callGeminiWithModel(apiKey, contents, "gemini-pro");
+        return await callGeminiWithModel(apiKey, contents, "gemini-pro-latest");
       }
       
       throw new Error(errorMsg);
@@ -47,7 +47,7 @@ async function callGemini(apiKey, contents, retryWithPro = true) {
     return text.replace(/```json/g, '').replace(/```/g, '').trim();
   } catch (error) {
     if (retryWithPro && !error.message.includes("API Key missing")) {
-       return await callGeminiWithModel(apiKey, contents, "gemini-pro");
+       return await callGeminiWithModel(apiKey, contents, "gemini-pro-latest");
     }
     throw error;
   }
