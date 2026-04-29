@@ -11,10 +11,6 @@ function App() {
   const [sessionId, setSessionId] = useState('');
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackData, setFeedbackData] = useState(null);
-  const [apiKey, setApiKey] = useState(localStorage.getItem('gemini_api_key') || '');
-  const [showApiKeyModal, setShowApiKeyModal] = useState(!localStorage.getItem('gemini_api_key'));
-  const [tempApiKey, setTempApiKey] = useState('');
-  
   useEffect(() => {
     startNewSession();
   }, []);
@@ -28,13 +24,7 @@ function App() {
     setFeedbackData(null);
   };
 
-  const saveApiKey = () => {
-    if (tempApiKey.trim()) {
-      localStorage.setItem('gemini_api_key', tempApiKey.trim());
-      setApiKey(tempApiKey.trim());
-      setShowApiKeyModal(false);
-    }
-  };
+
 
   const handleSendMessage = async (text) => {
     if (!text.trim()) return;
@@ -47,8 +37,7 @@ function App() {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ message: text, history: messages })
       });
@@ -68,8 +57,7 @@ function App() {
       const response = await fetch('/api/feedback', {
         method: 'POST',
         headers: { 
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ history: messages })
       });
@@ -85,25 +73,7 @@ function App() {
 
   return (
     <div className="app-container">
-      {showApiKeyModal && (
-        <div className="modal-overlay">
-          <div className="modal-content" style={{ textAlign: 'center' }}>
-            <h2>Welcome to AI English Tutor!</h2>
-            <p style={{ marginBottom: '20px', color: 'var(--text-muted)' }}>
-              Please enter your Google Gemini API Key to start practicing.
-            </p>
-            <input 
-              type="password" 
-              placeholder="Paste your API key here..." 
-              value={tempApiKey}
-              onChange={(e) => setTempApiKey(e.target.value)}
-            />
-            <button className="btn-close" onClick={saveApiKey}>
-              Save and Start
-            </button>
-          </div>
-        </div>
-      )}
+
 
       <header>
         <div className="header-title">
@@ -111,18 +81,13 @@ function App() {
           <p>Practice speaking & grammar</p>
         </div>
         <div className="header-actions">
-          <button onClick={() => {
-            localStorage.removeItem('gemini_api_key');
-            setApiKey('');
-            setShowApiKeyModal(true);
-          }}>Change API Key</button>
           <button onClick={startNewSession}>New Chat</button>
           <button className="btn-end" onClick={handleEndChat}>End Chat</button>
         </div>
       </header>
 
       <ChatInterface messages={messages} isTyping={isTyping} />
-      <InputArea onSend={handleSendMessage} disabled={isTyping || showApiKeyModal} />
+      <InputArea onSend={handleSendMessage} disabled={isTyping} />
       
       {showFeedback && (
         <FeedbackModal 
