@@ -43,7 +43,7 @@ async function handleChat(message, history, clientApiKey) {
     });
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-1.5-flash',
       contents: [
         { role: 'user', parts: [{ text: SYSTEM_PROMPT }] },
         { role: 'model', parts: [{ text: '{"reply": "Understood. I will strictly follow these rules and respond in JSON.", "correction": null, "explanation": null}' }] },
@@ -60,7 +60,7 @@ async function handleChat(message, history, clientApiKey) {
   } catch (error) {
     console.error("AI Service Error:", error);
     return {
-      reply: "I'm sorry, I am having trouble connecting right now. Please make sure your API key is correct.",
+      reply: `Connection error: ${error.message || 'Unknown error'}. Please check if your API key is active and has enough quota.`,
       correction: null,
       explanation: null
     };
@@ -95,7 +95,7 @@ ${history.map(h => {
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-1.5-flash',
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       config: {
         responseMimeType: "application/json",
@@ -104,7 +104,7 @@ ${history.map(h => {
     return JSON.parse(response.text);
   } catch (err) {
     console.error("Feedback error", err);
-    return { strengths: [], mistakes: [], suggestions: ["Keep practicing! API Key error."] };
+    return { strengths: [], mistakes: [], suggestions: [`Feedback generation failed: ${err.message || 'Unknown error'}`] };
   }
 }
 
@@ -133,7 +133,7 @@ Text to check:
 
     try {
         const response = await ai.models.generateContent({
-            model: 'gemini-2.0-flash',
+            model: 'gemini-1.5-flash',
             contents: [{ role: 'user', parts: [{ text: prompt }] }],
             config: {
                 responseMimeType: "application/json",
@@ -143,7 +143,7 @@ Text to check:
         return JSON.parse(response.text);
     } catch (err) {
         console.error("Grammar check error", err);
-        return { corrected: text, corrections: [], explanation: "Error during grammar check." };
+        return { corrected: text, corrections: [], explanation: `Grammar check failed: ${err.message || 'Unknown error'}` };
     }
 }
 
@@ -168,7 +168,7 @@ Return the result as a JSON array of objects:
 
     try {
         const response = await ai.models.generateContent({
-            model: 'gemini-2.0-flash',
+            model: 'gemini-1.5-flash',
             contents: [{ role: 'user', parts: [{ text: prompt }] }],
             config: {
                 responseMimeType: "application/json",
@@ -178,7 +178,7 @@ Return the result as a JSON array of objects:
         return JSON.parse(response.text);
     } catch (err) {
         console.error("Vocab error", err);
-        return [];
+        return [{ word: "Error", type: "error", meaning: `Could not fetch vocabulary: ${err.message || 'Unknown error'}`, example: "" }];
     }
 }
 
