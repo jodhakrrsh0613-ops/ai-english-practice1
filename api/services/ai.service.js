@@ -42,7 +42,7 @@ async function callGroq(apiKey, contents) {
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.error?.message || "Groq API error");
+    throw new Error(`Groq Error: ${error.error?.message || "API error"}`);
   }
 
   const data = await response.json();
@@ -66,7 +66,7 @@ async function callGemini(apiKey, contents) {
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.error?.message || "Gemini connection failed");
+    throw new Error(`Gemini Error: ${errorData.error?.message || "Connection failed"}`);
   }
 
   const data = await response.json();
