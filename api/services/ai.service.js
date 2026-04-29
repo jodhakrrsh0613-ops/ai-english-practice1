@@ -29,12 +29,12 @@ async function handleChat(message, history, clientApiKey) {
     const formattedHistory = history.map(msg => {
       let textContent = msg.content;
       if (msg.role === 'model') {
-          try {
-              const parsed = JSON.parse(msg.content);
-              textContent = JSON.stringify(parsed);
-          } catch (e) {
-              textContent = msg.content;
-          }
+        try {
+          const parsed = JSON.parse(msg.content);
+          textContent = JSON.stringify(parsed);
+        } catch (e) {
+          textContent = msg.content;
+        }
       }
       return {
         role: msg.role === 'user' ? 'user' : 'model',
@@ -43,17 +43,17 @@ async function handleChat(message, history, clientApiKey) {
     });
 
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: [
-            { role: 'user', parts: [{ text: SYSTEM_PROMPT }] },
-            { role: 'model', parts: [{ text: '{"reply": "Understood. I will strictly follow these rules and respond in JSON.", "correction": null, "explanation": null}' }] },
-            ...formattedHistory,
-            { role: 'user', parts: [{ text: message }] }
-        ],
-        config: {
-            responseMimeType: "application/json",
-            temperature: 0.7,
-        }
+      model: 'gemini-2.5-flash',
+      contents: [
+        { role: 'user', parts: [{ text: SYSTEM_PROMPT }] },
+        { role: 'model', parts: [{ text: '{"reply": "Understood. I will strictly follow these rules and respond in JSON.", "correction": null, "explanation": null}' }] },
+        ...formattedHistory,
+        { role: 'user', parts: [{ text: message }] }
+      ],
+      config: {
+        responseMimeType: "application/json",
+        temperature: 0.7,
+      }
     });
 
     return JSON.parse(response.text);
@@ -68,13 +68,13 @@ async function handleChat(message, history, clientApiKey) {
 }
 
 async function getFeedback(history, clientApiKey) {
-    const apiKey = clientApiKey || process.env.GEMINI_API_KEY;
-    if (!apiKey || apiKey === 'your_gemini_api_key_here') {
-        return { strengths: [], mistakes: [], suggestions: ["Please configure your API key."] };
-    }
-    const ai = new GoogleGenAI({ apiKey });
+  const apiKey = clientApiKey || process.env.GEMINI_API_KEY;
+  if (!apiKey || apiKey === 'your_gemini_api_key_here') {
+    return { strengths: [], mistakes: [], suggestions: ["Please configure your API key."] };
+  }
+  const ai = new GoogleGenAI({ apiKey });
 
-    const prompt = `Analyze the following conversation between a user and an English tutor.
+  const prompt = `Analyze the following conversation between a user and an English tutor.
 Provide feedback on the user's performance. Focus on their strengths, mistakes, and suggestions for improvement.
 Return the response as a JSON object with the structure:
 {
@@ -87,25 +87,99 @@ Conversation History:
 ${history.map(h => {
     let textContent = h.content;
     if (h.role === 'model') {
-        try { textContent = JSON.parse(h.content).reply; } catch(e) {}
+      try { textContent = JSON.parse(h.content).reply; } catch (e) { }
     }
     return `${h.role}: ${textContent}`;
-}).join('\n')}
+  }).join('\n')}
 `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      config: {
+        responseMimeType: "application/json",
+      }
+    });
+    return JSON.parse(response.text);
+  } catch (err) {
+    console.error("Feedback error", err);
+    return { strengths: [], mistakes: [], suggestions: ["Keep practicing! API Key error."] };
+  }
+}
+
+async function checkGrammar(text, clientApiKey) {
+    const apiKey = clientApiKey || process.env.GEMINI_API_KEY;
+    if (!apiKey || apiKey === 'your_gemini_api_key_here') {
+        return { corrected: text, corrections: [], explanation: "API Key missing." };
+    }
+    const ai = new GoogleGenAI({ apiKey });
+
+    const prompt = `Analyze and correct the following English text for grammar, punctuation, and style.
+Return the result as a JSON object with the structure:
+{
+  "corrected": "The full corrected text",
+  "corrections": [
+    {
+      "wrong": "word or phrase",
+      "correct": "corrected word or phrase",
+      "explanation": "why it was wrong"
+    }
+  ]
+}
+
+Text to check:
+"${text}"`;
 
     try {
         const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: 'gemini-2.0-flash',
             contents: [{ role: 'user', parts: [{ text: prompt }] }],
             config: {
                 responseMimeType: "application/json",
+                temperature: 0.2,
             }
         });
         return JSON.parse(response.text);
     } catch (err) {
-        console.error("Feedback error", err);
-        return { strengths: [], mistakes: [], suggestions: ["Keep practicing! API Key error."] };
+        console.error("Grammar check error", err);
+        return { corrected: text, corrections: [], explanation: "Error during grammar check." };
     }
 }
 
-module.exports = { handleChat, getFeedback };
+async function getVocabulary(clientApiKey) {
+    const apiKey = clientApiKey || process.env.GEMINI_API_KEY;
+    if (!apiKey || apiKey === 'your_gemini_api_key_here') {
+        return [];
+    }
+    const ai = new GoogleGenAI({ apiKey });
+
+    const prompt = `Provide 5 advanced or useful English vocabulary words for a language learner.
+For each word, provide:
+1. The word itself
+2. Part of speech (noun, verb, adj, etc.)
+3. A simple meaning
+4. A clear example sentence
+
+Return the result as a JSON array of objects:
+[
+  { "word": "word", "type": "noun", "meaning": "meaning", "example": "example" }
+]`;
+
+    try {
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.0-flash',
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            config: {
+                responseMimeType: "application/json",
+                temperature: 1,
+            }
+        });
+        return JSON.parse(response.text);
+    } catch (err) {
+        console.error("Vocab error", err);
+        return [];
+    }
+}
+
+module.exports = { handleChat, getFeedback, checkGrammar, getVocabulary };

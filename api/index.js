@@ -3,7 +3,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 dotenv.config();
 
-const { handleChat, getFeedback } = require('./services/ai.service');
+const { handleChat, getFeedback, checkGrammar, getVocabulary } = require('./services/ai.service');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -38,6 +38,29 @@ app.post('/api/feedback', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Failed to generate feedback' });
+  }
+});
+
+app.post('/api/grammar', async (req, res) => {
+  try {
+    const { text } = req.body;
+    const clientApiKey = req.headers['x-api-key'];
+    const result = await checkGrammar(text, clientApiKey);
+    res.json(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to check grammar' });
+  }
+});
+
+app.get('/api/vocabulary', async (req, res) => {
+  try {
+    const clientApiKey = req.headers['x-api-key'];
+    const result = await getVocabulary(clientApiKey);
+    res.json(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch vocabulary' });
   }
 });
 
