@@ -1,7 +1,6 @@
-import * as sdk from '@google/generative-ai';
-
-// Defensive way to get the constructor
-const GoogleGenAI = sdk.GoogleGenAI || (sdk.default && sdk.default.GoogleGenAI) || sdk.default;
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const { GoogleGenAI } = require('@google/generative-ai');
 
 const SYSTEM_PROMPT = `You are an English speaking practice assistant. You talk to users in simple English, correct their mistakes, explain briefly, and ask engaging questions to improve their speaking skills.
 
@@ -28,11 +27,13 @@ export async function handleChat(message, history, clientApiKey) {
       };
     }
     
-    if (typeof GoogleGenAI !== 'function') {
-        throw new Error("AI SDK failed to load correctly. Please redeploy.");
+    // Final check for the constructor
+    const GenAIClass = GoogleGenAI || require('@google/generative-ai').GoogleGenAI;
+    if (typeof GenAIClass !== 'function') {
+        throw new Error("SDK constructor not found. Please ensure @google/generative-ai is in package.json");
     }
 
-    const genAI = new GoogleGenAI(apiKey);
+    const genAI = new GenAIClass(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const formattedHistory = history.map(msg => {
@@ -82,7 +83,8 @@ export async function getFeedback(history, clientApiKey) {
     if (!apiKey || apiKey === 'your_gemini_api_key_here') {
       return { strengths: [], mistakes: [], suggestions: ["Please configure your API key."] };
     }
-    const genAI = new GoogleGenAI(apiKey);
+    const GenAIClass = GoogleGenAI || require('@google/generative-ai').GoogleGenAI;
+    const genAI = new GenAIClass(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `Analyze the following conversation between a user and an English tutor.
@@ -122,7 +124,8 @@ export async function checkGrammar(text, clientApiKey) {
     if (!apiKey || apiKey === 'your_gemini_api_key_here') {
         return { corrected: text, corrections: [], explanation: "API Key missing." };
     }
-    const genAI = new GoogleGenAI(apiKey);
+    const GenAIClass = GoogleGenAI || require('@google/generative-ai').GoogleGenAI;
+    const genAI = new GenAIClass(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `Analyze and correct the following English text for grammar, punctuation, and style.
@@ -162,7 +165,8 @@ export async function getVocabulary(clientApiKey) {
     if (!apiKey || apiKey === 'your_gemini_api_key_here') {
         return [];
     }
-    const genAI = new GoogleGenAI(apiKey);
+    const GenAIClass = GoogleGenAI || require('@google/generative-ai').GoogleGenAI;
+    const genAI = new GenAIClass(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `Provide 5 advanced or useful English vocabulary words for a language learner.
