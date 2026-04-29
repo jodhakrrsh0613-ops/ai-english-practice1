@@ -13,7 +13,9 @@ Rules:
 }`;
 
 async function callGemini(apiKey, contents) {
-  const url = `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`;
+  // We'll try gemini-1.5-flash first on v1beta
+  const modelName = "gemini-1.5-flash";
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
   
   const body = {
     contents: contents,
@@ -30,13 +32,25 @@ async function callGemini(apiKey, contents) {
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.error?.message || "Failed to connect to Gemini API");
+    let errorMsg = error.error?.message || "Connection failed";
+    
+    // If model not found, try to list available models to help the user
+    if (response.status === 404) {
+        try {
+            const listUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
+            const listRes = await fetch(listUrl);
+            const listData = await listRes.json();
+            const models = listData.models?.map(m => m.name.replace('models/', '')).join(', ');
+            errorMsg = `Model ${modelName} not found. Your available models are: ${models || 'None found'}. Please check if Generative Language API is enabled in Google Cloud Console.`;
+        } catch (e) {
+            errorMsg = "Model not found and could not list alternatives. Please verify your API Key and Project settings.";
+        }
+    }
+    throw new Error(errorMsg);
   }
 
   const data = await response.json();
   const text = data.candidates[0].content.parts[0].text;
-  
-  // Clean JSON response (sometimes AI adds markdown code blocks)
   return text.replace(/```json/g, '').replace(/```/g, '').trim();
 }
 
@@ -62,9 +76,8 @@ export async function handleChat(message, history, clientApiKey) {
     });
 
     const contents = [
-      { role: 'user', parts: [{ text: "SYSTEM INSTRUCTION: " + SYSTEM_PROMPT }] },
-      { role: 'model', parts: [{ text: "I understand. I will act as your English tutor and respond only in the JSON format you specified." }] },
       ...formattedHistory,
+      { role: 'user', parts: [{ text: "SYSTEM INSTRUCTION: " + SYSTEM_PROMPT }] },
       { role: 'user', parts: [{ text: message }] }
     ];
 
@@ -84,7 +97,6 @@ export async function getFeedback(history, clientApiKey) {
   try {
     const apiKey = clientApiKey || process.env.GEMINI_API_KEY;
     const prompt = `Analyze the conversation and provide feedback in JSON format: { "strengths": [], "mistakes": [], "suggestions": [] }. 
-    Important: Reply ONLY with the JSON object.
     History: ${JSON.stringify(history)}`;
 
     const resultText = await callGemini(apiKey, [{ role: 'user', parts: [{ text: prompt }] }]);
@@ -98,7 +110,6 @@ export async function checkGrammar(text, clientApiKey) {
   try {
     const apiKey = clientApiKey || process.env.GEMINI_API_KEY;
     const prompt = `Correct this text and explain in JSON: { "corrected": "", "corrections": [{ "wrong": "", "correct": "", "explanation": "" }] }. 
-    Important: Reply ONLY with the JSON object.
     Text: "${text}"`;
 
     const resultText = await callGemini(apiKey, [{ role: 'user', parts: [{ text: prompt }] }]);
@@ -111,8 +122,7 @@ export async function checkGrammar(text, clientApiKey) {
 export async function getVocabulary(clientApiKey) {
   try {
     const apiKey = clientApiKey || process.env.GEMINI_API_KEY;
-    const prompt = `Provide 5 vocab words in JSON array: [{ "word": "", "type": "", "meaning": "", "example": "" }]. 
-    Important: Reply ONLY with the JSON array.`;
+    const prompt = `Provide 5 vocab words in JSON array: [{ "word": "", "type": "", "meaning": "", "example": "" }]`;
 
     const resultText = await callGemini(apiKey, [{ role: 'user', parts: [{ text: prompt }] }]);
     return JSON.parse(resultText);
