@@ -46,7 +46,9 @@ async function callGroq(apiKey, contents) {
   }
 
   const data = await response.json();
-  return data.choices[0].message.content;
+  const text = data.choices[0].message.content;
+  // Clean JSON response (sometimes AI adds markdown code blocks)
+  return text.replace(/```json/g, '').replace(/```/g, '').trim();
 }
 
 async function callGemini(apiKey, contents) {

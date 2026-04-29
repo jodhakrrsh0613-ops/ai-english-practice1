@@ -1,81 +1,98 @@
 .navbar {
-  background: white;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 100;
-  border-bottom: 1px solid var(--border-color);
+  left: 0;
+  right: 0;
+  height: var(--nav-height);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  transition: all 0.3s ease;
 }
 
 .nav-container {
-  max-width: 1200px;
+  max-width: var(--container-max);
   margin: 0 auto;
-  padding: 0 24px;
-  height: 70px;
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 .nav-logo {
-  text-decoration: none;
   display: flex;
   align-items: center;
+  gap: 10px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--primary);
 }
 
-.logo-text {
-  font-size: 1.5rem;
-  font-weight: 800;
+.logo-icon {
   color: var(--primary);
-  letter-spacing: -0.5px;
+  filter: drop-shadow(0 0 8px rgba(79, 70, 229, 0.4));
 }
 
 .nav-links {
   display: flex;
-  gap: 24px;
+  gap: 32px;
+  align-items: center;
 }
 
-.nav-links a {
-  text-decoration: none;
+.nav-item {
+  font-weight: 500;
   color: var(--text-muted);
-  font-weight: 600;
-  font-size: 0.95rem;
-  padding: 8px 12px;
-  border-radius: 8px;
-  transition: all 0.2s;
+  position: relative;
+  padding: 4px 0;
 }
 
-.nav-links a:hover {
+.nav-item:hover, .nav-item.active {
   color: var(--primary);
-  background: var(--primary-light);
 }
 
-.nav-links a.active {
-  color: var(--primary);
-  background: var(--primary-light);
+.nav-item::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--primary);
+  transition: width 0.3s ease;
 }
 
-.nav-auth .btn-login {
+.nav-item:hover::after, .nav-item.active::after {
+  width: 100%;
+}
+
+.nav-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
-  text-decoration: none;
+  gap: 16px;
+}
+
+.theme-toggle, .btn-profile {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--primary-light);
+  color: var(--primary);
+  transition: all 0.2s;
+}
+
+.theme-toggle:hover, .btn-profile:hover {
+  transform: scale(1.1);
   background: var(--primary);
   color: white;
-  padding: 10px 20px;
-  border-radius: 12px;
-  font-weight: 700;
-  transition: all 0.2s;
-  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
 }
 
-.nav-auth .btn-login:hover {
-  background: var(--primary-hover);
-  transform: translateY(-2px);
-}
-
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
   .nav-links {
-    display: none; /* Add hamburger menu later */
+    display: none; /* In a real product, we'd add a mobile menu here */
   }
 }

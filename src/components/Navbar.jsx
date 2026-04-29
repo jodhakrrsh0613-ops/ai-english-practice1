@@ -1,34 +1,45 @@
 import { Link, useLocation } from 'react-router-dom';
-import { User, LogIn } from 'lucide-react';
+import { Sparkles, User, Sun, Moon } from 'lucide-react';
 import './Navbar.css';
 
-function Navbar() {
+function Navbar({ theme, toggleTheme }) {
   const location = useLocation();
 
-  const isActive = (path) => {
-    return location.pathname === path ? 'active' : '';
-  };
+  const navLinks = [
+    { name: 'Home', path: '/' },
+    { name: 'AI Chat', path: '/chat' },
+    { name: 'Grammar', path: '/grammar' },
+    { name: 'Vocabulary', path: '/vocabulary' },
+    { name: 'Dashboard', path: '/dashboard' },
+  ];
 
   return (
-    <nav className="navbar">
+    <nav className="navbar glass">
       <div className="nav-container">
         <Link to="/" className="nav-logo">
-          <span className="logo-text">SpeakPro AI</span>
+          <Sparkles className="logo-icon" size={28} />
+          <span>SpeakPro AI</span>
         </Link>
-        
-        <div className="nav-links">
-          <Link to="/" className={isActive('/')}>Home</Link>
-          <Link to="/chat" className={isActive('/chat')}>AI Chat</Link>
-          <Link to="/speaking" className={isActive('/speaking')}>Speaking</Link>
-          <Link to="/grammar" className={isActive('/grammar')}>Grammar</Link>
-          <Link to="/vocabulary" className={isActive('/vocabulary')}>Vocabulary</Link>
-          <Link to="/topics" className={isActive('/topics')}>Topics</Link>
-          <Link to="/dashboard" className={isActive('/dashboard')}>Dashboard</Link>
-        </div>
 
-        <div className="nav-auth">
-          <Link to="/auth" className="btn-login">
-            <LogIn size={18} /> Login
+        <ul className="nav-links">
+          {navLinks.map((link) => (
+            <li key={link.path}>
+              <Link 
+                to={link.path} 
+                className={`nav-item ${location.pathname === link.path ? 'active' : ''}`}
+              >
+                {link.name}
+              </Link>
+            </li>
+          ))}
+        </ul>
+
+        <div className="nav-actions">
+          <button className="theme-toggle" onClick={toggleTheme} title="Toggle Theme">
+            {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+          </button>
+          <Link to="/auth" className="btn-profile">
+            <User size={20} />
           </Link>
         </div>
       </div>

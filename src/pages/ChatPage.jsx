@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { PlusCircle, StopCircle, Info } from 'lucide-react';
 import ChatInterface from '../components/ChatInterface';
 import InputArea from '../components/InputArea';
 import FeedbackModal from '../components/FeedbackModal';
+import './Chat.css';
 
 function ChatPage() {
   const [messages, setMessages] = useState([]);
@@ -18,7 +20,7 @@ function ChatPage() {
   const startNewSession = () => {
     setSessionId(uuidv4());
     setMessages([
-      { role: 'model', content: JSON.stringify({ reply: "Hi! How are you today?" }) }
+      { role: 'model', content: JSON.stringify({ reply: "Hi! I'm your AI tutor. How are you feeling today? Let's practice some English!" }) }
     ]);
     setShowFeedback(false);
     setFeedbackData(null);
@@ -34,19 +36,16 @@ function ChatPage() {
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: text, history: messages })
       });
       const data = await response.json();
       
-      // Handle Rate Limits (Quota Exceeded)
       if (data.reply && data.reply.toString().includes("exceeded your current quota")) {
         const quotaMsg = {
           role: 'model',
           content: JSON.stringify({
-            reply: "I'm taking a short break! 😅 Please wait about 30-60 seconds and then try sending your message again. The free version has a small limit per minute.",
+            reply: "I'm taking a short break! 😅 Please wait about 30-60 seconds and then try sending your message again.",
             correction: null,
             explanation: null
           })
@@ -60,8 +59,7 @@ function ChatPage() {
         setMessages(prev => [...prev, assistantMsg]);
       }
     } catch (error) {
-      console.error("Error sending message:", error);
-      setMessages(prev => [...prev, { role: 'model', content: JSON.stringify({ reply: "Sorry, I'm having trouble connecting to the server.", correction: null, explanation: null }) }]);
+      setMessages(prev => [...prev, { role: 'model', content: JSON.stringify({ reply: "Connection error. Please try again.", correction: null, explanation: null }) }]);
     } finally {
       setIsTyping(false);
     }
@@ -72,9 +70,7 @@ function ChatPage() {
     try {
       const response = await fetch('/api/feedback', {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ history: messages })
       });
       const data = await response.json();
@@ -88,20 +84,43 @@ function ChatPage() {
   };
 
   return (
-    <div className="page-container chat-page">
-      <header className="page-header">
-        <div className="header-title">
-          <h1>AI English Tutor</h1>
-          <p>Practice speaking & grammar</p>
-        </div>
-        <div className="header-actions">
-          <button onClick={startNewSession}>New Chat</button>
-          <button className="btn-end" onClick={handleEndChat}>End Chat</button>
-        </div>
-      </header>
+    <div className="chat-page-container animate-fade">
+      <div className="chat-layout">
+        <aside className="chat-sidebar">
+          <button className="btn-new-chat" onClick={startNewSession}>
+            <PlusCircle size={20} />
+            <span>New Session</span>
+          </button>
+          
+          <div className="sidebar-info">
+            <div className="info-card">
+              <Info size={16} />
+              <p>Practice speaking freely. I will correct your grammar as we go!</p>
+            </div>
+          </div>
 
-      <ChatInterface messages={messages} isTyping={isTyping} />
-      <InputArea onSend={handleSendMessage} disabled={isTyping} />
+          <button className="btn-end-session" onClick={handleEndChat} disabled={messages.length < 3}>
+            <StopCircle size={20} />
+            <span>End & Review</span>
+          </button>
+        </aside>
+
+        <main className="chat-main">
+          <header className="chat-header glass">
+            <div className="chat-status">
+              <div className="status-dot"></div>
+              <span>Live Practice Session</span>
+            </div>
+          </header>
+
+          <ChatInterface messages={messages} isTyping={isTyping} />
+          
+          <footer className="chat-input-footer">
+            <InputArea onSend={handleSendMessage} disabled={isTyping} />
+            <p className="chat-tip">Tip: Try to use full sentences for better practice!</p>
+          </footer>
+        </main>
+      </div>
       
       {showFeedback && (
         <FeedbackModal 

@@ -8,11 +8,17 @@ import Dashboard from './pages/Dashboard';
 import Auth from './pages/Auth';
 import './App.css';
 
-// Placeholder Pages for remaining features
+import { Construction } from 'lucide-react';
+
 const Placeholder = ({ title }) => (
-  <div style={{ padding: '60px 20px', textAlign: 'center' }}>
-    <h2>{title}</h2>
-    <p style={{ color: 'var(--text-muted)', marginTop: '10px' }}>This feature is coming soon!</p>
+  <div className="section-container animate-fade" style={{ padding: '80px 24px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+    <div className="stat-icon-box orange" style={{ marginBottom: '24px', width: '80px', height: '80px' }}>
+      <Construction size={40} />
+    </div>
+    <h2 style={{ fontSize: '2rem', marginBottom: '12px' }}>{title}</h2>
+    <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', maxWidth: '400px' }}>
+      We're working hard to bring you the best {title} experience. Stay tuned!
+    </p>
   </div>
 );
 

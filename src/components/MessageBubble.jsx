@@ -1,4 +1,4 @@
-import { Volume2, AlertCircle } from 'lucide-react';
+import { Volume2, Sparkles, User } from 'lucide-react';
 
 function MessageBubble({ message }) {
   const isUser = message.role === 'user';
@@ -24,38 +24,51 @@ function MessageBubble({ message }) {
       const utterance = new SpeechSynthesisUtterance(content);
       utterance.lang = 'en-US';
       window.speechSynthesis.speak(utterance);
-    } else {
-      alert("Text-to-speech is not supported in your browser.");
     }
   };
 
   return (
-    <div className={`message-wrapper ${isUser ? 'user' : 'ai'}`}>
-      {!isUser && (
-        <div className="avatar ai-avatar">
-          <span>AI</span>
+    <div className={`message-wrapper ${isUser ? 'user-msg' : 'ai-msg'} animate-fade`}>
+      <div className="avatar-container">
+        <div className={`avatar ${isUser ? 'user-avatar' : 'ai-avatar'}`}>
+          {isUser ? <User size={20} /> : <Sparkles size={20} />}
         </div>
-      )}
-      <div className="message-bubble">
-        <div className="msg-content">{content}</div>
+      </div>
+      
+      <div className="message-container">
+        <div className="message-header">
+          <span className="sender-name">{isUser ? 'You' : 'SpeakPro AI'}</span>
+        </div>
         
-        {!isUser && (
-          <div className="msg-actions">
-            <button className="btn-icon" onClick={handleSpeak} title="Listen">
-              <Volume2 size={18} />
-            </button>
-          </div>
-        )}
-
-        {!isUser && correction && (
-          <div className="correction-box">
-            <div className="corr-title">
-              <AlertCircle size={16} /> Tutor Tip
+        <div className="message-bubble-content">
+          <div className="msg-text">{content}</div>
+          
+          {!isUser && (
+            <div className="msg-toolbar">
+              <button className="btn-action-icon" onClick={handleSpeak} title="Listen">
+                <Volume2 size={16} />
+              </button>
             </div>
-            <div className="corr-text">{correction}</div>
-            {explanation && <div className="corr-expl">{explanation}</div>}
-          </div>
-        )}
+          )}
+
+          {!isUser && (correction || explanation) && (
+            <div className="tutor-feedback animate-slide-up">
+              <div className="feedback-badge">Tutor Feedback</div>
+              {correction && (
+                <div className="feedback-item">
+                  <span className="label">Correction:</span>
+                  <p className="value highlight">{correction}</p>
+                </div>
+              )}
+              {explanation && (
+                <div className="feedback-item">
+                  <span className="label">Why?</span>
+                  <p className="value">{explanation}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

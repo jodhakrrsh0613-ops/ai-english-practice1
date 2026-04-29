@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Volume2, BookOpen, RefreshCw } from 'lucide-react';
+import { BookOpen, RefreshCw, Volume2, Plus, ArrowRight } from 'lucide-react';
 import './Vocabulary.css';
 
 function Vocabulary() {
-  const [dailyWords, setDailyWords] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [words, setWords] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     fetchVocab();
@@ -15,58 +15,47 @@ function Vocabulary() {
     try {
       const response = await fetch('/api/vocabulary');
       const data = await response.json();
-      setDailyWords(data);
+      setWords(data);
     } catch (error) {
-      console.error("Vocab fetch error:", error);
+      console.error("Error fetching vocab:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSpeak = (text) => {
+  const handleSpeak = (word) => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
+      const utterance = new SpeechSynthesisUtterance(word);
       utterance.lang = 'en-US';
       window.speechSynthesis.speak(utterance);
     }
   };
 
   return (
-    <div className="page-container vocab-page">
-      <header className="page-header">
-        <div className="header-title">
-          <h1>Vocabulary Builder <BookOpen size={24} style={{ display: 'inline', marginLeft: 8, color: 'var(--primary)' }}/></h1>
-          <p>Learn 5 new words today to enhance your vocabulary.</p>
-        </div>
-      </header>
+    <div className="vocab-page-container animate-fade">
+      <div className="section-container">
+        <header className="page-header-simple">
+          <h1 className="text-gradient">Vocabulary Builder</h1>
+          <p>Expand your lexicon with 5 hand-picked words every day.</p>
+          <button className="btn-refresh" onClick={fetchVocab} disabled={isLoading}>
+            {isLoading ? <RefreshCw className="spin" size={20} /> : <RefreshCw size={20} />}
+            <span>Get New Words</span>
+          </button>
+        </header>
 
-      <div className="vocab-content">
-        {isLoading ? (
-          <div className="loading-box">
-            <RefreshCw className="spin" size={40} />
-            <p>Generating your daily words...</p>
-          </div>
-        ) : (
-          <div className="words-grid">
-            {dailyWords.map((item, idx) => (
-              <div key={idx} className="word-card">
-                <div className="word-header">
-                  <div className="word-title-group">
-                    <h2>{item.word}</h2>
-                    <span className="word-type">{item.type}</span>
-                  </div>
-                  <button className="btn-icon" onClick={() => handleSpeak(item.word)} title="Listen">
-                    <Volume2 size={20} />
+        <div className="vocab-grid">
+          {isLoading ? (
+            Array(5).fill(0).map((_, i) => <div key={i} className="skeleton-card"></div>)
+          ) : (
+            words.map((item, idx) => (
+              <div key={idx} className="vocab-card animate-slide-up" style={{ animationDelay: `${idx * 0.1}s` }}>
+                <div className="card-top">
+                  <span className="word-type">{item.type}</span>
+                  <button className="speak-btn" onClick={() => handleSpeak(item.word)}>
+                    <Volume2 size={18} />
                   </button>
                 </div>
-                <div className="word-body">
-                  <p className="word-meaning"><strong>Meaning:</strong> {item.meaning}</p>
-                  <div className="word-example-box">
-                    <p><em>"{item.example}"</em></p>
-                    <button className="btn-icon-small" onClick={() => handleSpeak(item.example)} title="Listen to example">
-                      <Volume2 size={14} />
-                    </button>
                   </div>
                 </div>
               </div>

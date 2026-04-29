@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Mic } from 'lucide-react';
+import { Send, Mic, MicOff } from 'lucide-react';
 
 function InputArea({ onSend, disabled }) {
   const [text, setText] = useState('');
@@ -19,14 +19,8 @@ function InputArea({ onSend, disabled }) {
         setText((prev) => prev + (prev ? ' ' : '') + transcript);
       };
 
-      recognition.onend = () => {
-        setIsRecording(false);
-      };
-
-      recognition.onerror = (event) => {
-        console.error("Speech recognition error:", event.error);
-        setIsRecording(false);
-      };
+      recognition.onend = () => setIsRecording(false);
+      recognition.onerror = () => setIsRecording(false);
 
       recognitionRef.current = recognition;
     }
@@ -47,14 +41,10 @@ function InputArea({ onSend, disabled }) {
   };
 
   const toggleRecording = () => {
-    if (!recognitionRef.current) {
-      alert("Speech recognition is not supported in your browser.");
-      return;
-    }
+    if (!recognitionRef.current) return;
 
     if (isRecording) {
       recognitionRef.current.stop();
-      setIsRecording(false);
     } else {
       recognitionRef.current.start();
       setIsRecording(true);
@@ -62,34 +52,37 @@ function InputArea({ onSend, disabled }) {
   };
 
   return (
-    <div className="input-area">
-      <input 
-        type="text" 
-        placeholder="Type a message or tap mic to speak..." 
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        onKeyDown={handleKeyDown}
-        disabled={disabled}
-      />
-      
-      {text.trim() ? (
-        <button 
-          className="btn-send" 
-          onClick={handleSend}
-          disabled={disabled}
-        >
-          <Send size={22} />
-        </button>
-      ) : (
-        <button 
-          className={`btn-mic ${isRecording ? 'recording' : ''}`} 
-          onClick={toggleRecording}
-          disabled={disabled}
-          title="Voice Input"
-        >
-          <Mic size={24} />
-        </button>
-      )}
+    <div className="input-wrapper glass">
+      <div className={`input-container ${isRecording ? 'recording' : ''}`}>
+        <textarea 
+          placeholder={isRecording ? "Listening..." : "Type your message..."}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={handleKeyDown}
+          disabled={disabled || isRecording}
+          rows="1"
+        />
+        
+        <div className="input-actions">
+          <button 
+            className={`btn-icon-round ${isRecording ? 'active-mic' : ''}`} 
+            onClick={toggleRecording}
+            disabled={disabled}
+            title="Voice Input"
+          >
+            {isRecording ? <MicOff size={20} /> : <Mic size={20} />}
+          </button>
+          
+          <button 
+            className="btn-send-round" 
+            onClick={handleSend}
+            disabled={disabled || !text.trim()}
+            title="Send Message"
+          >
+            <Send size={20} />
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

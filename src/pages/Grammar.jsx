@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckCircle2, AlertCircle, RefreshCw, PenTool } from 'lucide-react';
+import { CheckCircle2, AlertCircle, RefreshCw, PenTool, ArrowRight } from 'lucide-react';
 import './Grammar.css';
 
 function Grammar() {
@@ -21,63 +21,62 @@ function Grammar() {
       setResult(data);
     } catch (error) {
       console.error("Grammar check error:", error);
-      alert("Failed to check grammar. Please try again.");
     } finally {
       setIsChecking(false);
     }
   };
 
   return (
-    <div className="page-container grammar-page">
-      <header className="page-header">
-        <div className="header-title">
-          <h1>Grammar Checker <PenTool size={24} style={{ display: 'inline', marginLeft: 8, color: 'var(--primary)' }}/></h1>
-          <p>Paste your text below and let AI find and fix your mistakes.</p>
-        </div>
-      </header>
+    <div className="grammar-page-container animate-fade">
+      <div className="section-container">
+        <header className="page-header-simple">
+          <h1 className="text-gradient">Grammar Checker</h1>
+          <p>Instantly fix your English mistakes and learn how to improve.</p>
+        </header>
 
-      <div className="grammar-content">
-        <div className="input-section">
-          <textarea
-            placeholder="Type or paste your English text here..."
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            disabled={isChecking}
-          />
-          <div className="grammar-actions">
-            <span className="char-count">{text.length} characters</span>
-            <button 
-              className="btn-primary" 
-              onClick={handleCheck}
-              disabled={isChecking || !text.trim()}
-            >
-              {isChecking ? <><RefreshCw className="spin" size={18} /> Checking...</> : 'Check Grammar'}
-            </button>
-          </div>
-        </div>
-
-        {result && (
-          <div className="result-section">
-            <div className="result-card">
-              <h3>Corrected Text</h3>
-              <p className="corrected-text">{result.corrected}</p>
+        <div className="grammar-tool-layout">
+          <div className="grammar-input-card glass">
+            <textarea
+              placeholder="Paste your text here (e.g., 'I has a apple')..."
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              disabled={isChecking}
+            />
+            <div className="card-footer">
+              <span className="count-badge">{text.length} characters</span>
+              <button 
+                className="btn-primary" 
+                onClick={handleCheck}
+                disabled={isChecking || !text.trim()}
+              >
+                {isChecking ? <><RefreshCw className="spin" size={18} /> Analyzing...</> : 'Check Writing'}
+              </button>
             </div>
+          </div>
 
-            <div className="corrections-list">
-              <h3>Detailed Corrections</h3>
-              {result.corrections.map((item, idx) => (
-                <div key={idx} className="correction-item">
-                  <div className="corr-header">
-                    <span className="wrong-badge"><AlertCircle size={14}/> {item.wrong}</span>
-                    <span className="arrow">→</span>
-                    <span className="correct-badge"><CheckCircle2 size={14}/> {item.correct}</span>
+          {result && (
+            <div className="grammar-results animate-slide-up">
+              <div className="result-main-card">
+                <div className="card-label">Perfected Version</div>
+                <p className="corrected-text-large">{result.corrected}</p>
+                <button className="btn-copy" onClick={() => navigator.clipboard.writeText(result.corrected)}>Copy Text</button>
+              </div>
+
+              <div className="corrections-grid">
+                {result.corrections.map((item, idx) => (
+                  <div key={idx} className="correction-detail-card">
+                    <div className="detail-header">
+                      <span className="badge error"><AlertCircle size={14}/> {item.wrong}</span>
+                      <ArrowRight size={16} className="arrow-icon" />
+                      <span className="badge success"><CheckCircle2 size={14}/> {item.correct}</span>
+                    </div>
+                    <p className="explanation-text">{item.explanation}</p>
                   </div>
-                  <p className="corr-explanation">{item.explanation}</p>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
