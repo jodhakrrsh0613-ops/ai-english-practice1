@@ -24,7 +24,8 @@ async function handleChat(message, history, clientApiKey) {
         explanation: null
       };
     }
-    const ai = new GoogleGenAI({ apiKey });
+    const genAI = new GoogleGenAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const formattedHistory = history.map(msg => {
       let textContent = msg.content;
@@ -42,21 +43,21 @@ async function handleChat(message, history, clientApiKey) {
       };
     });
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
-      contents: [
-        { role: 'user', parts: [{ text: SYSTEM_PROMPT }] },
-        { role: 'model', parts: [{ text: '{"reply": "Understood. I will strictly follow these rules and respond in JSON.", "correction": null, "explanation": null}' }] },
-        ...formattedHistory,
-        { role: 'user', parts: [{ text: message }] }
-      ],
-      config: {
+    const chatSession = model.startChat({
+      generationConfig: {
         responseMimeType: "application/json",
         temperature: 0.7,
-      }
+      },
+      history: [
+        { role: 'user', parts: [{ text: SYSTEM_PROMPT }] },
+        { role: 'model', parts: [{ text: '{"reply": "Understood. I will strictly follow these rules and respond in JSON.", "correction": null, "explanation": null}' }] },
+        ...formattedHistory
+      ],
     });
 
-    return JSON.parse(response.text);
+    const result = await chatSession.sendMessage(message);
+    const response = await result.response;
+    return JSON.parse(response.text());
   } catch (error) {
     console.error("AI Service Error:", error);
     return {
@@ -68,13 +69,15 @@ async function handleChat(message, history, clientApiKey) {
 }
 
 async function getFeedback(history, clientApiKey) {
-  const apiKey = clientApiKey || process.env.GEMINI_API_KEY;
-  if (!apiKey || apiKey === 'your_gemini_api_key_here') {
-    return { strengths: [], mistakes: [], suggestions: ["Please configure your API key."] };
-  }
-  const ai = new GoogleGenAI({ apiKey });
+  try {
+    const apiKey = clientApiKey || process.env.GEMINI_API_KEY;
+    if (!apiKey || apiKey === 'your_gemini_api_key_here') {
+      return { strengths: [], mistakes: [], suggestions: ["Please configure your API key."] };
+    }
+    const genAI = new GoogleGenAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-  const prompt = `Analyze the following conversation between a user and an English tutor.
+    const prompt = `Analyze the following conversation between a user and an English tutor.
 Provide feedback on the user's performance. Focus on their strengths, mistakes, and suggestions for improvement.
 Return the response as a JSON object with the structure:
 {
@@ -93,15 +96,12 @@ ${history.map(h => {
   }).join('\n')}
 `;
 
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+    const result = await model.generateContent({
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      config: {
-        responseMimeType: "application/json",
-      }
+      generationConfig: { responseMimeType: "application/json" }
     });
-    return JSON.parse(response.text);
+    const response = await result.response;
+    return JSON.parse(response.text());
   } catch (err) {
     console.error("Feedback error", err);
     return { strengths: [], mistakes: [], suggestions: [`Feedback generation failed: ${err.message || 'Unknown error'}`] };
@@ -109,11 +109,13 @@ ${history.map(h => {
 }
 
 async function checkGrammar(text, clientApiKey) {
+  try {
     const apiKey = clientApiKey || process.env.GEMINI_API_KEY;
     if (!apiKey || apiKey === 'your_gemini_api_key_here') {
         return { corrected: text, corrections: [], explanation: "API Key missing." };
     }
-    const ai = new GoogleGenAI({ apiKey });
+    const genAI = new GoogleGenAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `Analyze and correct the following English text for grammar, punctuation, and style.
 Return the result as a JSON object with the structure:
@@ -131,28 +133,29 @@ Return the result as a JSON object with the structure:
 Text to check:
 "${text}"`;
 
-    try {
-        const response = await ai.models.generateContent({
-            model: 'gemini-1.5-flash',
-            contents: [{ role: 'user', parts: [{ text: prompt }] }],
-            config: {
-                responseMimeType: "application/json",
-                temperature: 0.2,
-            }
-        });
-        return JSON.parse(response.text);
-    } catch (err) {
-        console.error("Grammar check error", err);
-        return { corrected: text, corrections: [], explanation: `Grammar check failed: ${err.message || 'Unknown error'}` };
-    }
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
+        responseMimeType: "application/json",
+        temperature: 0.2,
+      }
+    });
+    const response = await result.response;
+    return JSON.parse(response.text());
+  } catch (err) {
+    console.error("Grammar check error", err);
+    return { corrected: text, corrections: [], explanation: `Grammar check failed: ${err.message || 'Unknown error'}` };
+  }
 }
 
 async function getVocabulary(clientApiKey) {
+  try {
     const apiKey = clientApiKey || process.env.GEMINI_API_KEY;
     if (!apiKey || apiKey === 'your_gemini_api_key_here') {
         return [];
     }
-    const ai = new GoogleGenAI({ apiKey });
+    const genAI = new GoogleGenAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `Provide 5 advanced or useful English vocabulary words for a language learner.
 For each word, provide:
@@ -166,20 +169,19 @@ Return the result as a JSON array of objects:
   { "word": "word", "type": "noun", "meaning": "meaning", "example": "example" }
 ]`;
 
-    try {
-        const response = await ai.models.generateContent({
-            model: 'gemini-1.5-flash',
-            contents: [{ role: 'user', parts: [{ text: prompt }] }],
-            config: {
-                responseMimeType: "application/json",
-                temperature: 1,
-            }
-        });
-        return JSON.parse(response.text);
-    } catch (err) {
-        console.error("Vocab error", err);
-        return [{ word: "Error", type: "error", meaning: `Could not fetch vocabulary: ${err.message || 'Unknown error'}`, example: "" }];
-    }
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
+        responseMimeType: "application/json",
+        temperature: 1,
+      }
+    });
+    const response = await result.response;
+    return JSON.parse(response.text());
+  } catch (err) {
+    console.error("Vocab error", err);
+    return [{ word: "Error", type: "error", meaning: `Could not fetch vocabulary: ${err.message || 'Unknown error'}`, example: "" }];
+  }
 }
 
 module.exports = { handleChat, getFeedback, checkGrammar, getVocabulary };
