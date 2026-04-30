@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Sparkles, User, Sun, Moon, ChevronDown, Menu, X } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Sparkles, Sun, Moon, ChevronDown, Menu, X, LogOut, UserCircle } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
 const NAV_GROUPS = [
@@ -72,7 +73,15 @@ function NavDropdown({ group, currentPath }) {
 
 function Navbar({ theme, toggleTheme }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/auth');
+    setMobileOpen(false);
+  };
 
   return (
     <>
@@ -102,7 +111,15 @@ function Navbar({ theme, toggleTheme }) {
             <button className="theme-toggle" onClick={toggleTheme} title="Toggle Theme">
               {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
             </button>
-            <Link to="/auth" className="btn-profile"><User size={20} /></Link>
+            {user && (
+              <div className="nav-user-pill">
+                <UserCircle size={20} />
+                <span className="nav-user-name">{user.name.split(' ')[0]}</span>
+                <button className="btn-logout" onClick={handleLogout} title="Logout">
+                  <LogOut size={16} />
+                </button>
+              </div>
+            )}
             <button className="nav-hamburger" onClick={() => setMobileOpen(o => !o)}>
               {mobileOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
@@ -128,6 +145,11 @@ function Navbar({ theme, toggleTheme }) {
                 {group.name}
               </Link>
             )
+          )}
+          {user && (
+            <button className="mobile-logout-btn" onClick={handleLogout}>
+              <LogOut size={16} /> Sign Out ({user.name.split(' ')[0]})
+            </button>
           )}
         </div>
       )}

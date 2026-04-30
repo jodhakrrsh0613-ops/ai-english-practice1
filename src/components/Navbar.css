@@ -77,6 +77,41 @@
 }
 .theme-toggle:hover, .btn-profile:hover { transform: scale(1.1); background: var(--primary); color: white; }
 
+/* User pill */
+.nav-user-pill {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 12px 6px 10px;
+  border-radius: 999px;
+  background: var(--primary-light);
+  color: var(--primary);
+  border: 1px solid var(--border-color);
+}
+.nav-user-name {
+  font-size: 0.88rem; font-weight: 700;
+  max-width: 90px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.btn-logout {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(239,68,68,0.1);
+  color: #ef4444; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.btn-logout:hover { background: #ef4444; color: white; }
+
+/* Mobile logout */
+.mobile-logout-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 16px; margin-top: 8px;
+  border-radius: 10px; width: 100%;
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.2);
+  color: #ef4444; font-size: 0.95rem; font-weight: 600;
+  cursor: pointer; transition: all 0.15s;
+}
+.mobile-logout-btn:hover { background: #ef4444; color: white; }
+
 /* Hamburger */
 .nav-hamburger {
   display: none;
