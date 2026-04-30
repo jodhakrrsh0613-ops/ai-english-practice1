@@ -68,7 +68,7 @@
 
 .floating-card {
   position: absolute;
-  background: white;
+  background: var(--bg-card);
   padding: 12px 20px;
   border-radius: 12px;
   box-shadow: var(--shadow-lg);
@@ -77,6 +77,8 @@
   gap: 10px;
   font-weight: 500;
   animation: float 4s infinite ease-in-out;
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
 }
 
 .floating-card.c1 {
@@ -162,9 +164,9 @@
   transition: all 0.3s ease;
 }
 
-.feature-card.indigo .feature-icon-wrapper { background: #eef2ff; color: #4f46e5; }
-.feature-card.green .feature-icon-wrapper { background: #f0fdf4; color: #22c55e; }
-.feature-card.amber .feature-icon-wrapper { background: #fffbeb; color: #f59e0b; }
+.feature-card.indigo .feature-icon-wrapper { background: var(--primary-light); color: var(--primary); }
+.feature-card.green .feature-icon-wrapper { background: rgba(34,197,94,0.12); color: #22c55e; }
+.feature-card.amber .feature-icon-wrapper { background: rgba(245,158,11,0.12); color: #f59e0b; }
 
 .feature-title {
   font-size: 1.4rem;

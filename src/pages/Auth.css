@@ -76,7 +76,7 @@
 
 .input-with-icon input:focus {
   border-color: var(--primary);
-  background: white;
+  background: var(--bg-card);
   box-shadow: 0 0 0 4px var(--primary-light);
 }
 

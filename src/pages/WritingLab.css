@@ -60,7 +60,7 @@
   display: flex; align-items: center; gap: 8px;
   padding: 14px 18px;
   border-radius: var(--radius-md);
-  color: #dc2626; background: #fef2f2; border: 1px solid #fecaca;
+  color: #ef4444; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2);
   font-size: 0.9rem;
 }
 .eval-results { display: flex; flex-direction: column; gap: 16px; }
@@ -88,12 +88,12 @@
   padding: 20px; border-radius: var(--radius-md); border: 1px solid var(--border-color);
 }
 .eval-section-card h3 { display: flex; align-items: center; gap: 8px; font-size: 1rem; margin-bottom: 12px; }
-.strength-card { background: #f0fdf4; border-color: #bbf7d0; }
-.strength-card h3 { color: #16a34a; }
-.strength-card ul { padding-left: 18px; color: #166534; }
+.strength-card { background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.25); }
+.strength-card h3 { color: #22c55e; }
+.strength-card ul { padding-left: 18px; color: var(--text-muted); }
 .strength-card li { margin-bottom: 6px; font-size: 0.9rem; }
-.improve-card { background: #fffbeb; border-color: #fde68a; }
-.improve-card h3 { color: #b45309; }
+.improve-card { background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.25); }
+.improve-card h3 { color: #f59e0b; }
 .improvement-item { margin-bottom: 10px; }
 .issue-text { font-size: 0.88rem; color: #dc2626; margin-bottom: 3px; }
 .suggestion-text { font-size: 0.88rem; color: #16a34a; }
@@ -177,8 +177,8 @@
 }
 .option-btn:hover:not(:disabled) { border-color: var(--primary); background: var(--primary-light); }
 .option-btn.selected { border-color: var(--primary); background: var(--primary-light); color: var(--primary); font-weight: 600; }
-.option-btn.correct { border-color: #16a34a; background: #f0fdf4; color: #16a34a; font-weight: 700; }
-.option-btn.wrong { border-color: #dc2626; background: #fef2f2; color: #dc2626; }
+.option-btn.correct { border-color: #22c55e; background: rgba(34,197,94,0.1); color: #22c55e; font-weight: 700; }
+.option-btn.wrong { border-color: #ef4444; background: rgba(239,68,68,0.1); color: #ef4444; }
 .submitted .option-btn { cursor: default; }
 .explanation-pill {
   margin-top: 10px; padding: 10px 14px;

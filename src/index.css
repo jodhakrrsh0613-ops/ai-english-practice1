@@ -170,7 +170,7 @@ ul {
 }
 
 .btn-secondary {
-  background: white;
+  background: var(--bg-card);
   border: 1px solid var(--border-color);
   color: var(--text-main);
   padding: 10px 24px;
@@ -180,7 +180,8 @@ ul {
 
 .btn-secondary:hover {
   background: var(--bg-main);
-  border-color: var(--text-muted);
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 /* Animations */
