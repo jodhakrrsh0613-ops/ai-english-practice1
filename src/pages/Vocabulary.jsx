@@ -21,14 +21,20 @@ function Vocabulary() {
         throw new Error(`API Error: ${response.status} ${response.statusText}`);
       }
 
-      const data = await response.json();
-      
-      if (data && data.error) {
-        throw new Error(data.error);
-      }
+      let data = await response.json();
 
-      if (Array.isArray(data)) {
-        setWords(data);
+      // Handle double-encoded strings
+      if (typeof data === 'string') {
+        try { data = JSON.parse(data); } catch (e) {}
+      }
+      
+      // Handle wrapped responses from AI
+      const wordsArray = Array.isArray(data) ? data : (data.words || data.vocabulary || data.data || null);
+      
+      if (Array.isArray(wordsArray)) {
+        setWords(wordsArray);
+      } else if (data && data.error) {
+        throw new Error(data.error);
       } else {
         throw new Error("Invalid response format: expected an array of words");
       }

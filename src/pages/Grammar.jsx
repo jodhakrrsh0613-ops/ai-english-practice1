@@ -24,17 +24,25 @@ function Grammar() {
         throw new Error(`API Error: ${response.status} ${response.statusText}`);
       }
 
-      const data = await response.json();
+      let data = await response.json();
       
-      if (data && data.error) {
-        throw new Error(data.error);
+      // Handle double-encoded strings
+      if (typeof data === 'string') {
+        try { data = JSON.parse(data); } catch (e) {}
       }
 
-      if (!data || !data.corrected) {
+      // Handle wrapped responses from AI
+      const grammarData = data.corrected ? data : (data.grammar || data.data || data.result || data);
+      
+      if (grammarData && grammarData.error) {
+        throw new Error(grammarData.error);
+      }
+
+      if (!grammarData || !grammarData.corrected) {
         throw new Error("Invalid response format from server");
       }
 
-      setResult(data);
+      setResult(grammarData);
     } catch (error) {
       console.error("Grammar check error:", error);
       setError(error.message || "Failed to check grammar. Please try again.");
