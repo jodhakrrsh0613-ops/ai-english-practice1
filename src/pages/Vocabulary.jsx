@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { BookOpen, RefreshCw, Volume2, Plus, ArrowRight } from 'lucide-react';
+import { BookOpen, RefreshCw, Volume2, Plus, ArrowRight, AlertCircle } from 'lucide-react';
 import './Vocabulary.css';
 
 function Vocabulary() {
   const [words, setWords] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchVocab();
@@ -12,12 +13,28 @@ function Vocabulary() {
 
   const fetchVocab = async () => {
     setIsLoading(true);
+    setError(null);
     try {
       const response = await fetch('/api/vocabulary');
+      
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+      }
+
       const data = await response.json();
-      setWords(data);
+      
+      if (data && data.error) {
+        throw new Error(data.error);
+      }
+
+      if (Array.isArray(data)) {
+        setWords(data);
+      } else {
+        throw new Error("Invalid response format: expected an array of words");
+      }
     } catch (error) {
       console.error("Error fetching vocab:", error);
+      setError(error.message || "Failed to fetch vocabulary. Please check your connection.");
     } finally {
       setIsLoading(false);
     }
@@ -45,9 +62,21 @@ function Vocabulary() {
         </header>
 
         <div className="vocab-grid">
-          {isLoading ? (
+          {error ? (
+            <div className="error-container animate-fade">
+              <div className="error-box glass">
+                <AlertCircle size={32} />
+                <h3>Oops! Something went wrong</h3>
+                <p>{error}</p>
+                <button className="btn-retry" onClick={fetchVocab}>
+                  <RefreshCw size={18} />
+                  <span>Try Again</span>
+                </button>
+              </div>
+            </div>
+          ) : isLoading ? (
             Array(5).fill(0).map((_, i) => <div key={i} className="skeleton-card"></div>)
-          ) : (
+          ) : words && Array.isArray(words) && words.length > 0 ? (
             words.map((item, idx) => (
               <div key={idx} className="vocab-card animate-slide-up" style={{ animationDelay: `${idx * 0.1}s` }}>
                 <div className="card-top">
@@ -68,6 +97,10 @@ function Vocabulary() {
                 </button>
               </div>
             ))
+          ) : (
+            <div className="empty-state animate-fade">
+              <p>No words found for today. Try refreshing!</p>
+            </div>
           )}
         </div>
       </div>
