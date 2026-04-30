@@ -51,6 +51,39 @@ async function callGroq(apiKey, contents) {
   return text.replace(/```json/g, '').replace(/```/g, '').trim();
 }
 
+// Groq ke liye dedicated function - bina chat SYSTEM_PROMPT ke (grammar/vocab ke liye)
+async function callGroqDirect(apiKey, systemInstruction, userMessage) {
+  const url = "https://api.groq.com/openai/v1/chat/completions";
+
+  const body = {
+    model: "llama-3.3-70b-versatile",
+    messages: [
+      { role: "system", content: systemInstruction },
+      { role: "user", content: userMessage }
+    ],
+    response_format: { type: "json_object" },
+    temperature: 0.5
+  };
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(`Groq Error: ${error.error?.message || "API error"}`);
+  }
+
+  const data = await response.json();
+  const text = data.choices[0].message.content;
+  return text.replace(/```json/g, '').replace(/```/g, '').trim();
+}
+
 async function callGemini(apiKey, contents) {
   const modelName = "gemini-flash-latest";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
@@ -133,33 +166,76 @@ export async function getFeedback(history, clientApiKey) {
 export async function checkGrammar(text, clientApiKey) {
   try {
     const groqKey = process.env.GROQ_API_KEY;
-    const prompt = `Correct this text and explain in JSON: { "corrected": "", "corrections": [{ "wrong": "", "correct": "", "explanation": "" }] }. Text: "${text}"`;
     
+    const systemInstruction = `You are a professional English grammar checker. Your ONLY job is to analyze the given text and return a JSON object with EXACTLY this structure:
+{
+  "corrected": "the fully corrected version of the sentence",
+  "corrections": [
+    { "wrong": "the wrong word or phrase", "correct": "the correct version", "explanation": "brief reason why" }
+  ]
+}
+If the text is already correct, return the original text as "corrected" and an empty "corrections" array. Return ONLY the JSON, nothing else.`;
+
+    const userMessage = `Check this text for grammar mistakes: "${text}"`;
+
     let resultText;
-    if (groqKey) {
-      resultText = await callGroq(groqKey, [{ role: 'user', parts: prompt }]);
+    if (groqKey && groqKey !== 'your_groq_api_key_here') {
+      resultText = await callGroqDirect(groqKey, systemInstruction, userMessage);
     } else {
-      resultText = await callGemini(clientApiKey || process.env.GEMINI_API_KEY, [{ role: 'user', parts: [{ text: prompt }] }]);
+      const geminiPrompt = `${systemInstruction}\n\n${userMessage}`;
+      resultText = await callGemini(clientApiKey || process.env.GEMINI_API_KEY, [{ role: 'user', parts: [{ text: geminiPrompt }] }]);
     }
-    return JSON.parse(resultText);
+
+    const parsed = JSON.parse(resultText);
+
+    // Validate the response structure
+    if (!parsed.corrected) {
+      throw new Error('Invalid grammar response format from AI');
+    }
+
+    return {
+      corrected: parsed.corrected,
+      corrections: Array.isArray(parsed.corrections) ? parsed.corrections : []
+    };
   } catch (err) {
-    return { corrected: text, corrections: [], explanation: `Error: ${err.message}` };
+    console.error('Grammar check failed:', err.message);
+    return { corrected: text, corrections: [], error: `Error: ${err.message}` };
   }
 }
 
 export async function getVocabulary(clientApiKey) {
   try {
     const groqKey = process.env.GROQ_API_KEY;
-    const prompt = `Provide 5 vocab words in JSON array: [{ "word": "", "type": "", "meaning": "", "example": "" }]`;
     
+    // Groq json_object format mein array directly nahi aata, isliye wrapper use karte hain
+    const systemInstruction = `You are a vocabulary teacher. Return ONLY a JSON object with this exact structure:
+{
+  "words": [
+    { "word": "example", "type": "noun", "meaning": "a brief definition", "example": "A sentence using the word." }
+  ]
+}
+Provide exactly 5 interesting, useful English vocabulary words. No extra text, just the JSON.`;
+
+    const userMessage = `Give me 5 vocabulary words with their type, meaning, and an example sentence.`;
+
     let resultText;
-    if (groqKey) {
-      resultText = await callGroq(groqKey, [{ role: 'user', parts: prompt }]);
+    if (groqKey && groqKey !== 'your_groq_api_key_here') {
+      resultText = await callGroqDirect(groqKey, systemInstruction, userMessage);
+      const parsed = JSON.parse(resultText);
+      // Groq wraps in { words: [...] } — hum array extract karte hain
+      const wordsArray = Array.isArray(parsed) ? parsed : (parsed.words || parsed.vocabulary || parsed.data || []);
+      if (!Array.isArray(wordsArray) || wordsArray.length === 0) {
+        throw new Error('No vocabulary words returned from AI');
+      }
+      return wordsArray;
     } else {
-      resultText = await callGemini(clientApiKey || process.env.GEMINI_API_KEY, [{ role: 'user', parts: [{ text: prompt }] }]);
+      const geminiPrompt = `Provide 5 vocab words as a raw JSON array (no wrapper object): [{ "word": "", "type": "", "meaning": "", "example": "" }]`;
+      resultText = await callGemini(clientApiKey || process.env.GEMINI_API_KEY, [{ role: 'user', parts: [{ text: geminiPrompt }] }]);
+      const parsed = JSON.parse(resultText);
+      return Array.isArray(parsed) ? parsed : (parsed.words || parsed.vocabulary || []);
     }
-    return JSON.parse(resultText);
   } catch (err) {
-    return [{ word: "Error", type: "error", meaning: err.message, example: "" }];
+    console.error('Vocabulary fetch failed:', err.message);
+    return [{ word: "Error", type: "error", meaning: err.message, example: "Please check your API key and try again." }];
   }
 }
