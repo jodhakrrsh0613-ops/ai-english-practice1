@@ -52,7 +52,7 @@ async function callGroq(apiKey, contents) {
 }
 
 // Groq ke liye dedicated function - bina chat SYSTEM_PROMPT ke (grammar/vocab ke liye)
-async function callGroqDirect(apiKey, systemInstruction, userMessage) {
+async function callGroqDirect(apiKey, systemInstruction, userMessage, temperature = 0.5) {
   const url = "https://api.groq.com/openai/v1/chat/completions";
 
   const body = {
@@ -62,7 +62,7 @@ async function callGroqDirect(apiKey, systemInstruction, userMessage) {
       { role: "user", content: userMessage }
     ],
     response_format: { type: "json_object" },
-    temperature: 0.5
+    temperature: temperature
   };
 
   const response = await fetch(url, {
@@ -206,30 +206,47 @@ If the text is already correct, return the original text as "corrected" and an e
 export async function getVocabulary(clientApiKey) {
   try {
     const groqKey = process.env.GROQ_API_KEY;
-    
-    // Groq json_object format mein array directly nahi aata, isliye wrapper use karte hain
+
+    // Har call pe random category — AI ko force karta hai different words dene ke liye
+    const categories = [
+      'emotions and feelings',
+      'daily routines and habits',
+      'work and office life',
+      'home and family',
+      'food and eating',
+      'health and body',
+      'time and planning',
+      'friendship and relationships',
+      'travel and commute',
+      'shopping and money',
+      'school and learning',
+      'weather and nature',
+    ];
+    const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+    const randomSeed = Math.floor(Math.random() * 100000); // uniqueness ke liye
+
     const systemInstruction = `You are a friendly vocabulary teacher for beginners. Return ONLY a JSON object with this exact structure:
 {
   "words": [
     { "word": "example", "type": "noun", "meaning": "a brief definition", "example": "A sentence using the word." }
   ]
 }
-Provide exactly 5 simple, everyday English words that people commonly use in daily life — like words related to emotions, habits, work, home, food, time, or relationships. Avoid rare, advanced, or academic words. Choose words that a beginner or intermediate learner would find immediately useful in real conversations. No extra text, just the JSON.`;
+Provide exactly 5 DIFFERENT simple, everyday English words each time. Focus on the topic: "${randomCategory}". Avoid rare, advanced, or academic words. Every set must be unique and fresh — never repeat the same words. No extra text, just the JSON.`;
 
-    const userMessage = `Give me 5 common daily-life English vocabulary words (easy to medium difficulty) with their type, meaning, and a simple, realistic example sentence showing how it is used in everyday conversation.`;
+    const userMessage = `[Request #${randomSeed}] Give me 5 fresh, different everyday English vocabulary words about "${randomCategory}" (easy to medium level). Each word must have its type, a simple meaning, and a realistic example sentence from daily life. Do NOT repeat common words like happy, sad, eat, sleep etc.`;
 
     let resultText;
     if (groqKey && groqKey !== 'your_groq_api_key_here') {
-      resultText = await callGroqDirect(groqKey, systemInstruction, userMessage);
+      // temperature 0.95 — har baar naye words milenge
+      resultText = await callGroqDirect(groqKey, systemInstruction, userMessage, 0.95);
       const parsed = JSON.parse(resultText);
-      // Groq wraps in { words: [...] } — hum array extract karte hain
       const wordsArray = Array.isArray(parsed) ? parsed : (parsed.words || parsed.vocabulary || parsed.data || []);
       if (!Array.isArray(wordsArray) || wordsArray.length === 0) {
         throw new Error('No vocabulary words returned from AI');
       }
       return wordsArray;
     } else {
-      const geminiPrompt = `Provide 5 simple, everyday English vocabulary words (used in daily life, not advanced or rare words) as a raw JSON array (no wrapper object): [{ "word": "", "type": "", "meaning": "", "example": "" }]. Use words related to emotions, habits, work, home, food, time, or relationships. Example sentence must be simple and realistic.`;
+      const geminiPrompt = `[Request #${randomSeed}] Provide 5 fresh, different everyday English vocabulary words about "${randomCategory}" (not advanced or rare) as a raw JSON array: [{ "word": "", "type": "", "meaning": "", "example": "" }]. Every call must return a unique, different set of words.`;
       resultText = await callGemini(clientApiKey || process.env.GEMINI_API_KEY, [{ role: 'user', parts: [{ text: geminiPrompt }] }]);
       const parsed = JSON.parse(resultText);
       return Array.isArray(parsed) ? parsed : (parsed.words || parsed.vocabulary || []);
