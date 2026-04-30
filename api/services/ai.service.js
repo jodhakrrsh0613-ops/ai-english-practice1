@@ -208,15 +208,15 @@ export async function getVocabulary(clientApiKey) {
     const groqKey = process.env.GROQ_API_KEY;
     
     // Groq json_object format mein array directly nahi aata, isliye wrapper use karte hain
-    const systemInstruction = `You are a vocabulary teacher. Return ONLY a JSON object with this exact structure:
+    const systemInstruction = `You are a friendly vocabulary teacher for beginners. Return ONLY a JSON object with this exact structure:
 {
   "words": [
     { "word": "example", "type": "noun", "meaning": "a brief definition", "example": "A sentence using the word." }
   ]
 }
-Provide exactly 5 interesting, useful English vocabulary words. No extra text, just the JSON.`;
+Provide exactly 5 simple, everyday English words that people commonly use in daily life — like words related to emotions, habits, work, home, food, time, or relationships. Avoid rare, advanced, or academic words. Choose words that a beginner or intermediate learner would find immediately useful in real conversations. No extra text, just the JSON.`;
 
-    const userMessage = `Give me 5 vocabulary words with their type, meaning, and an example sentence.`;
+    const userMessage = `Give me 5 common daily-life English vocabulary words (easy to medium difficulty) with their type, meaning, and a simple, realistic example sentence showing how it is used in everyday conversation.`;
 
     let resultText;
     if (groqKey && groqKey !== 'your_groq_api_key_here') {
@@ -229,7 +229,7 @@ Provide exactly 5 interesting, useful English vocabulary words. No extra text, j
       }
       return wordsArray;
     } else {
-      const geminiPrompt = `Provide 5 vocab words as a raw JSON array (no wrapper object): [{ "word": "", "type": "", "meaning": "", "example": "" }]`;
+      const geminiPrompt = `Provide 5 simple, everyday English vocabulary words (used in daily life, not advanced or rare words) as a raw JSON array (no wrapper object): [{ "word": "", "type": "", "meaning": "", "example": "" }]. Use words related to emotions, habits, work, home, food, time, or relationships. Example sentence must be simple and realistic.`;
       resultText = await callGemini(clientApiKey || process.env.GEMINI_API_KEY, [{ role: 'user', parts: [{ text: geminiPrompt }] }]);
       const parsed = JSON.parse(resultText);
       return Array.isArray(parsed) ? parsed : (parsed.words || parsed.vocabulary || []);
