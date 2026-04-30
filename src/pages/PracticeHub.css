@@ -1,0 +1,248 @@
+.practice-hub-page { min-height: calc(100vh - var(--nav-height)); }
+
+/* Tabs */
+.hub-tabs {
+  display: flex;
+  gap: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 6px;
+  margin-bottom: 28px;
+  width: fit-content;
+}
+.hub-tab {
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.hub-tab.active { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(79,70,229,0.3); }
+.hub-tab:hover:not(.active) { color: var(--primary); background: var(--primary-light); }
+.hub-body { max-width: 760px; }
+
+/* Tab content */
+.tab-content { display: flex; flex-direction: column; gap: 20px; }
+.tab-intro { color: var(--text-muted); margin-bottom: 8px; }
+
+/* Section badges */
+.section-badge {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+.section-badge.indigo { background: var(--primary-light); color: var(--primary); }
+.section-badge.green { background: #f0fdf4; color: #16a34a; }
+.section-badge.amber { background: #fffbeb; color: #b45309; }
+
+/* Practice sentence card */
+.practice-sentence-card {
+  padding: 20px 24px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+}
+.sentence-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+.sentence-actions { display: flex; gap: 6px; }
+.btn-icon-sm {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  background: var(--bg-main);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.15s;
+}
+.btn-icon-sm:hover { color: var(--primary); border-color: var(--primary); }
+.target-sentence { font-size: 1.15rem; font-weight: 600; color: var(--text-main); line-height: 1.6; }
+
+/* Mic zone */
+.mic-zone {
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  padding: 24px;
+}
+.btn-big-mic {
+  width: 84px; height: 84px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), #6366f1);
+  color: white;
+  border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(79,70,229,0.35);
+  transition: all 0.2s;
+}
+.btn-big-mic:hover { transform: scale(1.06); box-shadow: 0 12px 32px rgba(79,70,229,0.45); }
+.btn-big-mic.listening {
+  background: linear-gradient(135deg, #ef4444, #f97316);
+  box-shadow: 0 8px 24px rgba(239,68,68,0.4);
+  animation: pulse-ring 1.5s infinite;
+}
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+  70% { box-shadow: 0 0 0 20px rgba(239,68,68,0); }
+  100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+}
+.mic-label { font-size: 0.9rem; color: var(--text-muted); font-weight: 500; }
+
+/* Spoken box */
+.spoken-box {
+  padding: 18px 20px;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  display: flex; flex-direction: column; gap: 10px;
+}
+.spoken-text { font-size: 1rem; color: var(--text-main); font-style: italic; }
+.btn-sm { padding: 8px 20px; font-size: 0.9rem; display: flex; align-items: center; gap: 6px; width: fit-content; }
+
+/* Result card */
+.result-card {
+  padding: 24px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  display: flex; flex-direction: column; align-items: center; gap: 16px;
+}
+.score-circle {
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  border: 6px solid var(--score-color, var(--primary));
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: var(--bg-card);
+}
+.score-num { font-size: 2rem; font-weight: 800; color: var(--text-main); line-height: 1; }
+.score-label { font-size: 0.75rem; color: var(--text-muted); }
+.overall-feedback { text-align: center; color: var(--text-muted); font-size: 0.95rem; max-width: 500px; }
+.words-analysis { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.word-chip {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  position: relative;
+  cursor: default;
+}
+.word-chip.correct { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+.word-chip.incorrect { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+.word-chip.close { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+.word-tip {
+  display: none;
+  position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%);
+  background: #1f2937; color: white;
+  padding: 6px 10px; border-radius: 6px;
+  font-size: 0.78rem; white-space: nowrap; z-index: 10;
+}
+.word-chip:hover .word-tip { display: block; }
+.practice-tip-box {
+  background: var(--primary-light);
+  color: var(--primary);
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  width: 100%;
+  text-align: center;
+}
+
+/* Roleplay */
+.roles-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.role-card {
+  padding: 20px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--bg-card);
+}
+.role-card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(79,70,229,0.15); }
+.role-icon-label { font-size: 1.05rem; font-weight: 700; color: var(--text-main); display: block; margin-bottom: 6px; }
+.role-desc { font-size: 0.85rem; color: var(--text-muted); }
+.roleplay-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.btn-change-role {
+  padding: 6px 16px; border-radius: 8px;
+  background: var(--bg-main); border: 1px solid var(--border-color);
+  color: var(--text-muted); font-size: 0.82rem; cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-change-role:hover { border-color: var(--primary); color: var(--primary); }
+.roleplay-active { height: 520px; }
+.roleplay-messages {
+  flex: 1; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 12px;
+  padding: 16px; background: var(--bg-main);
+  border-radius: var(--radius-md); border: 1px solid var(--border-color);
+  margin-bottom: 12px; min-height: 360px;
+}
+.rp-msg { display: flex; flex-direction: column; }
+.rp-user { align-items: flex-end; }
+.rp-ai { align-items: flex-start; }
+.rp-bubble {
+  max-width: 75%;
+  padding: 10px 16px;
+  border-radius: 16px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+.rp-user .rp-bubble { background: var(--primary); color: white; border-radius: 16px 16px 4px 16px; }
+.rp-ai .rp-bubble { background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 16px 16px 16px 4px; }
+.rp-correction { font-size: 0.82rem; color: #16a34a; padding: 4px 12px; }
+.roleplay-input-row { display: flex; gap: 8px; }
+.rp-input {
+  flex: 1; padding: 12px 16px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-card); color: var(--text-main);
+  font-size: 0.95rem; font-family: inherit; outline: none;
+}
+.rp-input:focus { border-color: var(--primary); }
+.btn-send-rp {
+  width: 48px; height: 48px; border-radius: var(--radius-md);
+  background: var(--primary); color: white; border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.15s;
+}
+.btn-send-rp:hover:not(:disabled) { background: var(--primary-hover); }
+.btn-send-rp:disabled { opacity: 0.5; cursor: not-allowed; }
+.typing-dots { display: flex; gap: 5px; align-items: center; padding: 14px 16px !important; }
+.typing-dots span { width: 7px; height: 7px; background: var(--text-muted); border-radius: 50%; animation: typing 1.4s infinite; }
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typing { 0%,100% { transform: translateY(0); opacity: 0.4; } 50% { transform: translateY(-5px); opacity: 1; } }
+
+/* Reading */
+.reading-card {
+  padding: 24px; border-radius: var(--radius-md); border: 1px solid var(--border-color);
+}
+.reading-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+.reading-btns { display: flex; gap: 6px; }
+.passage-title { font-size: 1.1rem; margin-top: 4px; }
+.passage-text { font-size: 1rem; line-height: 1.9; color: var(--text-main); }
+.fluency-result {
+  padding: 20px 24px; border-radius: var(--radius-md); border: 1px solid var(--border-color);
+  display: flex; flex-direction: column; gap: 12px;
+}
+.fluency-score-row { display: flex; justify-content: space-between; align-items: center; font-weight: 700; }
+.fluency-num { font-size: 1.5rem; }
+.fluency-bar { height: 10px; background: var(--border-color); border-radius: 999px; overflow: hidden; }
+.fluency-fill { height: 100%; border-radius: 999px; transition: width 0.8s ease; }
+.fluency-msg { font-size: 0.9rem; color: var(--text-muted); text-align: center; }
+
+.spin { animation: spin 1s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+@media (max-width: 640px) {
+  .roles-grid { grid-template-columns: 1fr; }
+  .hub-tabs { flex-wrap: wrap; width: 100%; }
+  .hub-tab { flex: 1; text-align: center; }
+}

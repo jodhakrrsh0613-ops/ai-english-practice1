@@ -6,35 +6,33 @@ import Grammar from './pages/Grammar';
 import Vocabulary from './pages/Vocabulary';
 import Dashboard from './pages/Dashboard';
 import Auth from './pages/Auth';
+
+// ── New Feature Pages ──
+import Translator from './pages/Translator';
+import PracticeHub from './pages/PracticeHub';
+import WritingLab from './pages/WritingLab';
+import ToolsHub from './pages/ToolsHub';
+
 import './App.css';
-
-import { Construction } from 'lucide-react';
-
-const Placeholder = ({ title }) => (
-  <div className="section-container animate-fade" style={{ padding: '80px 24px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-    <div className="stat-icon-box orange" style={{ marginBottom: '24px', width: '80px', height: '80px' }}>
-      <Construction size={40} />
-    </div>
-    <h2 style={{ fontSize: '2rem', marginBottom: '12px' }}>{title}</h2>
-    <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', maxWidth: '400px' }}>
-      We're working hard to bring you the best {title} experience. Stay tuned!
-    </p>
-  </div>
-);
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<MainLayout />}>
+          {/* Existing routes — unchanged */}
           <Route index element={<Home />} />
           <Route path="chat" element={<ChatPage />} />
-          <Route path="speaking" element={<Placeholder title="Speaking Practice" />} />
           <Route path="grammar" element={<Grammar />} />
           <Route path="vocabulary" element={<Vocabulary />} />
-          <Route path="topics" element={<Placeholder title="Topics & Categories" />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="auth" element={<Auth />} />
+
+          {/* New feature routes */}
+          <Route path="translator" element={<Translator />} />
+          <Route path="practice" element={<PracticeHub />} />
+          <Route path="writing" element={<WritingLab />} />
+          <Route path="tools" element={<ToolsHub />} />
         </Route>
       </Routes>
     </BrowserRouter>

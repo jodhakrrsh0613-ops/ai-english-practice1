@@ -251,8 +251,271 @@ Provide exactly 5 DIFFERENT simple, everyday English words each time. Focus on t
       const parsed = JSON.parse(resultText);
       return Array.isArray(parsed) ? parsed : (parsed.words || parsed.vocabulary || []);
     }
-  } catch (err) {
+    } catch (err) {
     console.error('Vocabulary fetch failed:', err.message);
     return [{ word: "Error", type: "error", meaning: err.message, example: "Please check your API key and try again." }];
   }
 }
+
+// ─────────────────────────────────────────────────────────
+// NEW FEATURE FUNCTIONS
+// ─────────────────────────────────────────────────────────
+
+export async function translateText(text, direction, clientApiKey) {
+  try {
+    const groqKey = process.env.GROQ_API_KEY;
+    const [fromLang, toLang] = direction === 'en-hi'
+      ? ['English', 'Hindi']
+      : ['Hindi', 'English'];
+
+    const systemInstruction = `You are a professional translator. Translate the given text accurately and naturally.
+Return ONLY a JSON object with this exact structure:
+{
+  "translation": "the translated text here",
+  "explanation": "A brief 1-2 sentence explanation of any key translation choices or nuances"
+}
+No extra text, just the JSON.`;
+
+    const userMessage = `Translate the following ${fromLang} text to ${toLang}:\n\n"${text}"`;
+
+    let resultText;
+    if (groqKey && groqKey !== 'your_groq_api_key_here') {
+      resultText = await callGroqDirect(groqKey, systemInstruction, userMessage, 0.3);
+    } else {
+      const geminiPrompt = `${systemInstruction}\n\n${userMessage}`;
+      resultText = await callGemini(clientApiKey || process.env.GEMINI_API_KEY, [{ role: 'user', parts: [{ text: geminiPrompt }] }]);
+    }
+    const parsed = JSON.parse(resultText);
+    if (!parsed.translation) throw new Error('Invalid translation response');
+    return parsed;
+  } catch (err) {
+    console.error('Translation failed:', err.message);
+    return { translation: '', explanation: '', error: err.message };
+  }
+}
+
+export async function rewriteSentence(text, mode, clientApiKey) {
+  try {
+    const groqKey = process.env.GROQ_API_KEY;
+    const modeDesc = mode === 'formal'
+      ? 'Transform the sentence from informal/casual to formal and professional'
+      : mode === 'advanced'
+      ? 'Transform the sentence from simple to more advanced and sophisticated'
+      : 'Make the sentence shorter and simpler to understand';
+
+    const systemInstruction = `You are an expert English writing coach. ${modeDesc}.
+Return ONLY a JSON object with this exact structure:
+{
+  "suggestions": [
+    { "text": "rewritten version 1", "note": "what changed and why" },
+    { "text": "rewritten version 2", "note": "what changed and why" },
+    { "text": "rewritten version 3", "note": "what changed and why" }
+  ]
+}
+Provide exactly 3 different suggestions. No extra text, just the JSON.`;
+
+    const userMessage = `Rewrite this sentence (${mode} mode):\n\n"${text}"`;
+
+    let resultText;
+    if (groqKey && groqKey !== 'your_groq_api_key_here') {
+      resultText = await callGroqDirect(groqKey, systemInstruction, userMessage, 0.8);
+    } else {
+      const geminiPrompt = `${systemInstruction}\n\n${userMessage}`;
+      resultText = await callGemini(clientApiKey || process.env.GEMINI_API_KEY, [{ role: 'user', parts: [{ text: geminiPrompt }] }]);
+    }
+    const parsed = JSON.parse(resultText);
+    if (!parsed.suggestions || !Array.isArray(parsed.suggestions)) throw new Error('Invalid rewrite response');
+    return parsed;
+  } catch (err) {
+    console.error('Rewrite failed:', err.message);
+    return { suggestions: [], error: err.message };
+  }
+}
+
+export async function evaluateWriting(text, clientApiKey) {
+  try {
+    const groqKey = process.env.GROQ_API_KEY;
+
+    const systemInstruction = `You are an expert English writing evaluator. Analyze the given text thoroughly.
+Return ONLY a JSON object with this exact structure:
+{
+  "score": 78,
+  "grade": "B+",
+  "grammar_score": 80,
+  "vocabulary_score": 75,
+  "clarity_score": 82,
+  "corrected": "the corrected version of the full text",
+  "strengths": ["strength 1", "strength 2"],
+  "improvements": [
+    { "issue": "describe the issue", "suggestion": "how to fix it" }
+  ],
+  "summary": "A 2-3 sentence overall assessment"
+}
+Score should be out of 100. No extra text, just the JSON.`;
+
+    const userMessage = `Evaluate this English writing:\n\n"${text}"`;
+
+    let resultText;
+    if (groqKey && groqKey !== 'your_groq_api_key_here') {
+      resultText = await callGroqDirect(groqKey, systemInstruction, userMessage, 0.4);
+    } else {
+      const geminiPrompt = `${systemInstruction}\n\n${userMessage}`;
+      resultText = await callGemini(clientApiKey || process.env.GEMINI_API_KEY, [{ role: 'user', parts: [{ text: geminiPrompt }] }]);
+    }
+    const parsed = JSON.parse(resultText);
+    if (parsed.score === undefined) throw new Error('Invalid evaluation response');
+    return parsed;
+  } catch (err) {
+    console.error('Writing evaluation failed:', err.message);
+    return { score: 0, error: err.message };
+  }
+}
+
+export async function generateQuiz(topic, difficulty, clientApiKey) {
+  try {
+    const groqKey = process.env.GROQ_API_KEY;
+    const seed = Math.floor(Math.random() * 99999);
+
+    const systemInstruction = `You are an English language quiz master. Generate unique quiz questions each time.
+Return ONLY a JSON object with this exact structure:
+{
+  "topic": "topic name",
+  "questions": [
+    {
+      "question": "question text",
+      "options": ["A. option1", "B. option2", "C. option3", "D. option4"],
+      "answer": "A",
+      "explanation": "Why this is correct"
+    }
+  ]
+}
+Generate exactly 5 questions. Make options distinct and plausible. No extra text, just the JSON.`;
+
+    const userMessage = `[Seed:${seed}] Generate a ${difficulty || 'medium'} difficulty English quiz about: "${topic}". Make sure all 5 questions are unique and varied.`;
+
+    let resultText;
+    if (groqKey && groqKey !== 'your_groq_api_key_here') {
+      resultText = await callGroqDirect(groqKey, systemInstruction, userMessage, 0.9);
+    } else {
+      const geminiPrompt = `${systemInstruction}\n\n${userMessage}`;
+      resultText = await callGemini(clientApiKey || process.env.GEMINI_API_KEY, [{ role: 'user', parts: [{ text: geminiPrompt }] }]);
+    }
+    const parsed = JSON.parse(resultText);
+    if (!parsed.questions || !Array.isArray(parsed.questions)) throw new Error('Invalid quiz response');
+    return parsed;
+  } catch (err) {
+    console.error('Quiz generation failed:', err.message);
+    return { questions: [], error: err.message };
+  }
+}
+
+export async function generateEmail(type, details, clientApiKey) {
+  try {
+    const groqKey = process.env.GROQ_API_KEY;
+
+    const typeDescriptions = {
+      formal: 'a formal business email',
+      leave: 'a leave application letter',
+      job: 'a job application cover letter',
+      apology: 'a professional apology email',
+      complaint: 'a polite complaint email',
+    };
+
+    const systemInstruction = `You are a professional English communication expert. Generate ${typeDescriptions[type] || 'a professional email'}.
+Return ONLY a JSON object with this exact structure:
+{
+  "subject": "Email subject line",
+  "body": "Full email body with proper formatting using \\n for line breaks. Include greeting, paragraphs, and sign-off.",
+  "tips": ["tip 1 about this type of email", "tip 2", "tip 3"]
+}
+No extra text, just the JSON.`;
+
+    const userMessage = `Generate ${typeDescriptions[type] || 'a professional email'} with these details:\n${JSON.stringify(details)}`;
+
+    let resultText;
+    if (groqKey && groqKey !== 'your_groq_api_key_here') {
+      resultText = await callGroqDirect(groqKey, systemInstruction, userMessage, 0.6);
+    } else {
+      const geminiPrompt = `${systemInstruction}\n\n${userMessage}`;
+      resultText = await callGemini(clientApiKey || process.env.GEMINI_API_KEY, [{ role: 'user', parts: [{ text: geminiPrompt }] }]);
+    }
+    const parsed = JSON.parse(resultText);
+    if (!parsed.subject || !parsed.body) throw new Error('Invalid email response');
+    return parsed;
+  } catch (err) {
+    console.error('Email generation failed:', err.message);
+    return { subject: '', body: '', tips: [], error: err.message };
+  }
+}
+
+export async function evaluatePronunciation(spokenText, targetText, clientApiKey) {
+  try {
+    const groqKey = process.env.GROQ_API_KEY;
+
+    const systemInstruction = `You are a pronunciation coach. Compare what the user said vs what they should have said.
+Return ONLY a JSON object with this exact structure:
+{
+  "score": 85,
+  "words": [
+    { "word": "example", "status": "correct", "tip": null },
+    { "word": "difficult", "status": "incorrect", "tip": "Focus on the 'iff' sound: dif-fi-cult" }
+  ],
+  "overall_feedback": "Overall assessment of pronunciation accuracy",
+  "practice_tip": "One specific tip to improve"
+}
+Score is 0-100. Status is "correct", "incorrect", or "close". No extra text, just the JSON.`;
+
+    const userMessage = `Target sentence: "${targetText}"\nUser said: "${spokenText}"\n\nEvaluate the pronunciation accuracy word by word.`;
+
+    let resultText;
+    if (groqKey && groqKey !== 'your_groq_api_key_here') {
+      resultText = await callGroqDirect(groqKey, systemInstruction, userMessage, 0.3);
+    } else {
+      const geminiPrompt = `${systemInstruction}\n\n${userMessage}`;
+      resultText = await callGemini(clientApiKey || process.env.GEMINI_API_KEY, [{ role: 'user', parts: [{ text: geminiPrompt }] }]);
+    }
+    const parsed = JSON.parse(resultText);
+    if (parsed.score === undefined) throw new Error('Invalid pronunciation response');
+    return parsed;
+  } catch (err) {
+    console.error('Pronunciation evaluation failed:', err.message);
+    return { score: 0, words: [], overall_feedback: err.message, error: err.message };
+  }
+}
+
+export async function generateResume(details, clientApiKey) {
+  try {
+    const groqKey = process.env.GROQ_API_KEY;
+
+    const systemInstruction = `You are a professional resume writer. Create a polished, ATS-friendly English resume.
+Return ONLY a JSON object with this exact structure:
+{
+  "sections": {
+    "header": "Name\\nEmail | Phone | Location",
+    "summary": "Professional summary paragraph",
+    "experience": "Formatted work experience with bullet points using \\n",
+    "education": "Formatted education section",
+    "skills": "Formatted skills section"
+  },
+  "tips": ["Resume tip 1", "Resume tip 2", "Resume tip 3"]
+}
+Use professional English. No extra text, just the JSON.`;
+
+    const userMessage = `Create a professional resume with these details:\n${JSON.stringify(details)}`;
+
+    let resultText;
+    if (groqKey && groqKey !== 'your_groq_api_key_here') {
+      resultText = await callGroqDirect(groqKey, systemInstruction, userMessage, 0.5);
+    } else {
+      const geminiPrompt = `${systemInstruction}\n\n${userMessage}`;
+      resultText = await callGemini(clientApiKey || process.env.GEMINI_API_KEY, [{ role: 'user', parts: [{ text: geminiPrompt }] }]);
+    }
+    const parsed = JSON.parse(resultText);
+    if (!parsed.sections) throw new Error('Invalid resume response');
+    return parsed;
+  } catch (err) {
+    console.error('Resume generation failed:', err.message);
+    return { sections: {}, tips: [], error: err.message };
+  }
+}
+
