@@ -243,6 +243,30 @@
 
 @media (max-width: 640px) {
   .roles-grid { grid-template-columns: 1fr; }
-  .hub-tabs { flex-wrap: wrap; width: 100%; }
-  .hub-tab { flex: 1; text-align: center; }
+  .hub-tabs { 
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%; 
+    gap: 4px;
+  }
+  .hub-tab { 
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    text-align: center; 
+  }
+  .hub-tab:last-child {
+    grid-column: span 2;
+  }
+  .btn-big-mic {
+    width: 72px;
+    height: 72px;
+  }
+  .target-sentence {
+    font-size: 1rem;
+  }
+  .roleplay-active {
+    height: auto;
+    min-height: 500px;
+  }
 }
+

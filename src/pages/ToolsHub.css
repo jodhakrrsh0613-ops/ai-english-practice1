@@ -208,9 +208,25 @@
 
 @media (max-width: 640px) {
   .mode-selector { grid-template-columns: 1fr; }
-  .email-type-grid { grid-template-columns: 1fr 1fr; }
-  .hub-tabs { flex-wrap: wrap; width: 100%; }
-  .hub-tab { flex: 1; text-align: center; font-size: 0.8rem; padding: 8px 12px; }
+  .email-type-grid { grid-template-columns: 1fr; }
+  .hub-tabs { 
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%; 
+    gap: 4px;
+  }
+  .hub-tab { 
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    text-align: center; 
+  }
+  .hub-tab:last-child {
+    grid-column: span 2;
+  }
   .resume-steps-bar { gap: 4px; }
   .dot-label { display: none; }
+  .email-form, .resume-form-card {
+    padding: 16px;
+  }
 }
+

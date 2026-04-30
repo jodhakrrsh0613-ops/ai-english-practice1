@@ -382,7 +382,54 @@
   .chat-sidebar {
     display: none;
   }
+  
+  .chat-container {
+    padding: 24px 16px;
+    gap: 24px;
+  }
+  
+  .message-wrapper {
+    gap: 12px;
+  }
+  
+  .avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 0.8rem;
+  }
+  
+  .message-bubble-content {
+    padding: 12px 16px;
+  }
+  
+  .msg-text {
+    font-size: 0.95rem;
+  }
+  
+  .chat-input-footer {
+    padding: 16px;
+  }
+  
+  .input-wrapper {
+    padding: 4px 12px;
+  }
 }
+
+@media (max-width: 480px) {
+  .chat-header {
+    padding: 0 16px;
+  }
+  
+  .chat-status {
+    font-size: 0.85rem;
+  }
+  
+  .btn-send-round {
+    width: 36px;
+    height: 36px;
+  }
+}
+
 
 /* Input Wrapper Styling */
 .input-wrapper {

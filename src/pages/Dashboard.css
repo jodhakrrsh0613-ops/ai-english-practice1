@@ -114,6 +114,27 @@
   }
 }
 
+@media (max-width: 640px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .stat-card {
+    padding: 16px;
+  }
+  .streak-dots {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .chart-section {
+    padding: 16px;
+  }
+  .chart-container-box {
+    height: 220px;
+  }
+}
+
+
 /* Streak Section */
 .streak-section {
   padding: 28px;

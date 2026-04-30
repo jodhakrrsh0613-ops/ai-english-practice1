@@ -170,6 +170,13 @@
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
 @media (max-width: 640px) {
-  .translator-panels { grid-template-columns: 1fr; grid-template-rows: 1fr 1px 1fr; }
+  .translator-panels { 
+    grid-template-columns: 1fr; 
+    grid-template-rows: auto auto auto; 
+    min-height: 0;
+  }
   .panels-divider { height: 1px; width: 100%; }
+  .trans-panel { padding: 16px; }
+  .btn-translate { width: 100%; }
 }
+
