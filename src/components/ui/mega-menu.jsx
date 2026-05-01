@@ -27,7 +27,7 @@ const MegaMenu = React.forwardRef(({ items, className, ...props }, ref) => {
           {navItem.link ? (
             <Link
               to={navItem.link}
-              className="relative flex cursor-pointer items-center justify-center gap-1.5 py-3 px-7 text-[1.05rem] font-semibold transition-all duration-300 hover:text-indigo-500 hover:scale-105 group"
+              className="relative flex cursor-pointer items-center justify-center gap-1.5 py-3.5 px-8 text-[1.05rem] font-semibold transition-all duration-300 hover:text-indigo-500 hover:scale-105 group"
               onMouseEnter={() => setIsHover(navItem.id)}
               onMouseLeave={() => setIsHover(null)}
               style={{ color: 'var(--text-main)' }}
@@ -38,7 +38,7 @@ const MegaMenu = React.forwardRef(({ items, className, ...props }, ref) => {
                   layoutId="hover-bg"
                   className="absolute inset-0 size-full"
                   style={{
-                    borderRadius: 18,
+                    borderRadius: 12,
                     backgroundColor: 'rgba(255, 255, 255, 0.08)',
                   }}
                 />
@@ -46,7 +46,7 @@ const MegaMenu = React.forwardRef(({ items, className, ...props }, ref) => {
             </Link>
           ) : (
             <button
-              className="relative flex cursor-pointer items-center justify-center gap-1.5 py-3 px-7 text-[1.05rem] font-semibold transition-all duration-300 hover:text-indigo-500 hover:scale-105 group"
+              className="relative flex cursor-pointer items-center justify-center gap-1.5 py-3.5 px-8 text-[1.05rem] font-semibold transition-all duration-300 hover:text-indigo-500 hover:scale-105 group"
               onMouseEnter={() => setIsHover(navItem.id)}
               onMouseLeave={() => setIsHover(null)}
               style={{ color: 'var(--text-main)' }}
@@ -64,7 +64,7 @@ const MegaMenu = React.forwardRef(({ items, className, ...props }, ref) => {
                   layoutId="hover-bg"
                   className="absolute inset-0 size-full"
                   style={{
-                    borderRadius: 18,
+                    borderRadius: 12,
                     backgroundColor: 'rgba(255, 255, 255, 0.08)',
                   }}
                 />
