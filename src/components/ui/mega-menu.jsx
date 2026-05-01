@@ -74,43 +74,44 @@ const MegaMenu = React.forwardRef(({ items, className, ...props }, ref) => {
 
           <AnimatePresence>
             {openMenu === navItem.label && navItem.subMenus && (
-              <div className="absolute left-0 top-full w-auto pt-2 z-50">
+              <div className="absolute left-0 top-full w-auto pt-4 z-50">
                 <motion.div
-                  className="w-max border p-4 shadow-2xl backdrop-blur-xl"
+                  className="w-max border p-6 shadow-2xl backdrop-blur-2xl"
                   style={{
-                    borderRadius: 16,
-                    backgroundColor: 'var(--bg-card)',
-                    borderColor: 'var(--border-color)',
+                    borderRadius: 20,
+                    backgroundColor: 'rgba(15, 15, 20, 0.95)',
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
                   }}
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
+                  exit={{ opacity: 0, y: 15 }}
+                  transition={{ duration: 0.2 }}
                   layoutId="menu"
                 >
-                  <div className="flex w-fit shrink-0 space-x-9 overflow-hidden p-2">
+                  <div className="flex w-fit shrink-0 space-x-12 overflow-hidden">
                     {navItem.subMenus.map((sub) => (
                       <motion.div layout className="w-full" key={sub.title}>
-                        <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider opacity-50" style={{ color: 'var(--text-main)' }}>
+                        <h3 className="mb-6 text-[0.7rem] font-bold uppercase tracking-[0.1em] opacity-40" style={{ color: 'var(--text-main)' }}>
                           {sub.title}
                         </h3>
-                        <ul className="space-y-4">
+                        <ul className="space-y-5">
                           {sub.items.map((item) => {
                             const Icon = item.icon;
                             return (
                               <li key={item.label}>
                                 <Link
                                   to={item.path || "#"}
-                                  className="flex items-start space-x-3 group p-2 rounded-lg transition-colors hover:bg-indigo-500/10"
+                                  className="flex items-center space-x-4 group p-3 rounded-xl transition-all hover:bg-white/5"
                                   onClick={() => setOpenMenu(null)}
                                 >
-                                  <div className="flex size-9 shrink-0 items-center justify-center rounded-md border text-indigo-500 transition-colors duration-300 group-hover:bg-indigo-500 group-hover:text-white" style={{ borderColor: 'var(--border-color)' }}>
+                                  <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-white/10 text-indigo-400 transition-all duration-300 group-hover:scale-110 group-hover:bg-indigo-500 group-hover:text-white group-hover:border-indigo-500">
                                     <Icon className="h-5 w-5 flex-none" />
                                   </div>
-                                  <div className="w-max leading-5">
-                                    <p className="shrink-0 text-sm font-medium" style={{ color: 'var(--text-main)' }}>
+                                  <div className="flex flex-col gap-1 pr-4">
+                                    <p className="text-[0.95rem] font-semibold leading-none" style={{ color: 'var(--text-main)' }}>
                                       {item.label}
                                     </p>
-                                    <p className="shrink-0 text-xs opacity-60" style={{ color: 'var(--text-main)' }}>
+                                    <p className="text-[0.8rem] opacity-50 font-medium whitespace-nowrap" style={{ color: 'var(--text-main)' }}>
                                       {item.description}
                                     </p>
                                   </div>
