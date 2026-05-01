@@ -6,7 +6,8 @@ import {
   BarChart3, 
   Settings, 
   Sparkles,
-  ChevronRight
+  ChevronRight,
+  X
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './Sidebar.css';
@@ -18,8 +19,6 @@ const SIDEBAR_LINKS = [
   { name: 'Analytics', path: '/analytics', icon: <BarChart3 size={20} /> },
   { name: 'Settings', path: '/settings', icon: <Settings size={20} /> },
 ];
-
-import { X } from 'lucide-react';
 
 function Sidebar({ mobileOpen, closeSidebar }) {
   const location = useLocation();
