@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { MessageSquare, Mic, BookOpen, Search, BarChart3, ArrowRight } from 'lucide-react';
-import ShaderBackground from '../components/ui/shader-background';
+import { NeuralNoise } from '../components/ui/neural-noise';
 import './Home.css';
 
 function Home() {
@@ -37,7 +37,7 @@ function Home() {
 
   return (
     <div className="home-page animate-fade relative overflow-hidden">
-      <ShaderBackground />
+      <NeuralNoise />
 
       <div className="relative z-10">
         <section className="hero-section">
