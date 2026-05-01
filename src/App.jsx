@@ -61,7 +61,7 @@ function AppRoutes() {
       <Route path="/" element={
         <ProtectedRoute><MainLayout /></ProtectedRoute>
       }>
-        <Route index element={<Home />} />
+        <Route index element={<Dashboard />} />
         <Route path="chat" element={<ChatPage />} />
         <Route path="grammar" element={<Grammar />} />
         <Route path="vocabulary" element={<Vocabulary />} />
@@ -70,6 +70,7 @@ function AppRoutes() {
         <Route path="practice" element={<PracticeHub />} />
         <Route path="writing" element={<WritingLab />} />
         <Route path="tools" element={<ToolsHub />} />
+        <Route path="welcome" element={<Home />} />
       </Route>
 
       {/* Catch all — redirect to home */}

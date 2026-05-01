@@ -1,49 +1,50 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Colors */
-  --primary: #4f46e5;
-  --primary-hover: #4338ca;
-  --primary-light: #e0e7ff;
+  /* Colors - Premium Dark Palette */
+  --bg-main: #05051a;
+  --bg-sidebar: #060714;
+  --bg-card: #111229;
+  --bg-card-hover: #161730;
+  --bg-input: #1a1b3a;
+  
+  --primary: #7c3aed;
+  --primary-hover: #6d28d9;
+  --primary-light: rgba(124, 58, 237, 0.15);
+  --primary-glow: rgba(124, 58, 237, 0.4);
+  
   --secondary: #22c55e;
   --accent: #f59e0b;
   
-  /* Neutral Colors */
-  --bg-main: #f9fafb;
-  --bg-card: #ffffff;
-  --bg-input: #ffffff;
-  --text-main: #111827;
-  --text-muted: #6b7280;
-  --border-color: #e5e7eb;
+  /* Text */
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+  
+  /* Borders & Shadows */
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(255, 255, 255, 0.15);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.7);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.8);
   
   /* UI Elements */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --radius-sm: 8px;
   --radius-md: 12px;
-  --radius-lg: 20px;
-  
-  /* Status Colors */
-  --success-bg: #f0fdf4;
-  --success-border: #bbf7d0;
-  --success-text: #166534;
-  --error-bg: #fef2f2;
-  --error-border: #fecaca;
-  --error-text: #991b1b;
-
+  --radius-lg: 24px;
   --nav-height: 72px;
-  --container-max: 1200px;
+  --sidebar-width: 260px;
+  --container-max: 1400px;
+  
+  /* Status */
+  --success-bg: rgba(34, 197, 94, 0.1);
+  --success-text: #4ade80;
+  --error-bg: rgba(239, 68, 68, 0.1);
+  --error-text: #f87171;
 }
 
-[data-theme='dark'] {
-  --bg-main: #111827;
-  --bg-card: #1f2937;
-  --bg-input: #374151;
-  --text-main: #f9fafb;
-  --text-muted: #9ca3af;
-  --border-color: #374151;
-  --primary-light: rgba(79, 70, 229, 0.1);
+[data-theme='light'] {
+  /* Keep it dark as the primary theme */
 }
 
 * {
