@@ -14,7 +14,7 @@ const MegaMenu = React.forwardRef(({ items, className, ...props }, ref) => {
   return (
     <ul
       ref={ref}
-      className={`relative flex items-center space-x-0 ${className || ""}`}
+      className={`relative flex items-center space-x-2 ${className || ""}`}
       {...props}
     >
       {items.map((navItem) => (
@@ -27,7 +27,7 @@ const MegaMenu = React.forwardRef(({ items, className, ...props }, ref) => {
           {navItem.link ? (
             <Link
               to={navItem.link}
-              className="relative flex cursor-pointer items-center justify-center gap-1 py-1.5 px-4 text-sm font-medium transition-colors duration-300 hover:text-indigo-500 group"
+              className="relative flex cursor-pointer items-center justify-center gap-1 py-2 px-4 text-[0.95rem] font-medium transition-colors duration-300 hover:text-indigo-500 group"
               onMouseEnter={() => setIsHover(navItem.id)}
               onMouseLeave={() => setIsHover(null)}
               style={{ color: 'var(--text-main)' }}
@@ -46,7 +46,7 @@ const MegaMenu = React.forwardRef(({ items, className, ...props }, ref) => {
             </Link>
           ) : (
             <button
-              className="relative flex cursor-pointer items-center justify-center gap-1 py-1.5 px-4 text-sm font-medium transition-colors duration-300 hover:text-indigo-500 group"
+              className="relative flex cursor-pointer items-center justify-center gap-1 py-2 px-4 text-[0.95rem] font-medium transition-colors duration-300 hover:text-indigo-500 group"
               onMouseEnter={() => setIsHover(navItem.id)}
               onMouseLeave={() => setIsHover(null)}
               style={{ color: 'var(--text-main)' }}
