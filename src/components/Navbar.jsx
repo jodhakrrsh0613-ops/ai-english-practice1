@@ -1,10 +1,102 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Sparkles, Sun, Moon, ChevronDown, Menu, X, LogOut, UserCircle } from 'lucide-react';
+import { 
+  Sparkles, Sun, Moon, ChevronDown, Menu, X, LogOut, UserCircle, 
+  MessageSquare, Book, CheckSquare, Languages, Zap, FileText, Activity, Layout, 
+  Search, Palette, BookOpen, Shield, Rocket, Cpu 
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import MegaMenu from './ui/mega-menu';
 import './Navbar.css';
 
-const NAV_GROUPS = [
+const MEGA_MENU_ITEMS = [
+  { id: 1, label: "Home", link: "/" },
+  { id: 2, label: "AI Chat", link: "/chat" },
+  {
+    id: 3,
+    label: "Practice",
+    subMenus: [
+      {
+        title: "Learning Hub",
+        items: [
+          {
+            label: "Practice Lab",
+            description: "Real-time conversation practice",
+            icon: Activity,
+            path: "/practice"
+          },
+          {
+            label: "Grammar Checker",
+            description: "Fix writing errors instantly",
+            icon: CheckSquare,
+            path: "/grammar"
+          },
+          {
+            label: "Vocabulary",
+            description: "Learn high-impact words",
+            icon: Book,
+            path: "/vocabulary"
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 4,
+    label: "Tools",
+    subMenus: [
+      {
+        title: "Utility Tools",
+        items: [
+          {
+            label: "Translator",
+            description: "Speak across languages",
+            icon: Languages,
+            path: "/translator"
+          },
+          {
+            label: "AI Rewriter",
+            description: "Refine your sentences",
+            icon: Zap,
+            path: "/tools"
+          },
+          {
+            label: "Resume Builder",
+            description: "Create professional CVs",
+            icon: FileText,
+            path: "/tools"
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 5,
+    label: "Writing",
+    subMenus: [
+      {
+        title: "Evaluation",
+        items: [
+          {
+            label: "Writing Test",
+            description: "Get detailed feedback",
+            icon: Layout,
+            path: "/writing"
+          },
+          {
+            label: "Smart Quiz",
+            description: "Test your knowledge",
+            icon: Palette,
+            path: "/writing"
+          },
+        ],
+      },
+    ],
+  },
+  { id: 6, label: "Dashboard", link: "/dashboard" },
+];
+
+const MOBILE_GROUPS = [
   { name: 'Home', path: '/' },
   { name: 'AI Chat', path: '/chat' },
   {
@@ -19,57 +111,19 @@ const NAV_GROUPS = [
     name: 'Tools',
     children: [
       { name: '🌐 Translator', path: '/translator' },
-      { name: '🧠 Sentence Rewriter', path: '/tools' },
-      { name: '📧 Email Generator', path: '/tools' },
+      { name: '🧠 AI Rewriter', path: '/tools' },
       { name: '🧾 Resume Builder', path: '/tools' },
     ]
   },
   {
     name: 'Writing',
     children: [
-      { name: '📝 Writing Evaluation', path: '/writing' },
+      { name: '📝 Writing Test', path: '/writing' },
       { name: '🧪 Smart Quiz', path: '/writing' },
     ]
   },
   { name: 'Dashboard', path: '/dashboard' },
 ];
-
-function NavDropdown({ group, currentPath }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef(null);
-  const isActive = group.children?.some(c => currentPath === c.path);
-
-  useEffect(() => {
-    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, []);
-
-  return (
-    <li className="nav-dropdown-wrapper" ref={ref}>
-      <button
-        className={`nav-item nav-dropdown-trigger ${isActive ? 'active' : ''}`}
-        onClick={() => setOpen(o => !o)}
-      >
-        {group.name} <ChevronDown size={14} className={`chevron ${open ? 'open' : ''}`} />
-      </button>
-      {open && (
-        <div className="nav-dropdown-menu glass animate-fade">
-          {group.children.map(child => (
-            <Link
-              key={child.path + child.name}
-              to={child.path}
-              className={`nav-dropdown-item ${currentPath === child.path ? 'active' : ''}`}
-              onClick={() => setOpen(false)}
-            >
-              {child.name}
-            </Link>
-          ))}
-        </div>
-      )}
-    </li>
-  );
-}
 
 function Navbar({ theme, toggleTheme }) {
   const location = useLocation();
@@ -92,20 +146,10 @@ function Navbar({ theme, toggleTheme }) {
             <span>SpeakPro AI</span>
           </Link>
 
-          {/* Desktop Nav */}
-          <ul className="nav-links">
-            {NAV_GROUPS.map(group =>
-              group.children ? (
-                <NavDropdown key={group.name} group={group} currentPath={location.pathname} />
-              ) : (
-                <li key={group.path}>
-                  <Link to={group.path} className={`nav-item ${location.pathname === group.path ? 'active' : ''}`}>
-                    {group.name}
-                  </Link>
-                </li>
-              )
-            )}
-          </ul>
+          {/* Desktop Nav - Mega Menu */}
+          <div className="desktop-nav">
+            <MegaMenu items={MEGA_MENU_ITEMS} />
+          </div>
 
           <div className="nav-actions">
             <button className="theme-toggle" onClick={toggleTheme} title="Toggle Theme">
@@ -130,7 +174,7 @@ function Navbar({ theme, toggleTheme }) {
       {/* Mobile Menu */}
       {mobileOpen && (
         <div className="mobile-menu glass animate-fade" onClick={() => setMobileOpen(false)}>
-          {NAV_GROUPS.map(group =>
+          {MOBILE_GROUPS.map(group =>
             group.children ? (
               <div key={group.name} className="mobile-group">
                 <span className="mobile-group-label">{group.name}</span>
