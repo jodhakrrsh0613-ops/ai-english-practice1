@@ -54,6 +54,12 @@ function Home() {
             </div>
           </div>
           <div className="hero-visual-scene animate-fade">
+            <div className="floating-card c1">
+              <MessageSquare size={20} /> <span>How can I help?</span>
+            </div>
+            <div className="floating-card c2">
+              <div className="dot"></div> <span>AI is analyzing...</span>
+            </div>
             <img src="/images/ai-agent-v2.png" alt="AI Agent Professional" className="hero-main-image" />
           </div>
         </section>

@@ -84,6 +84,7 @@
   animation: float 4s infinite ease-in-out;
   color: var(--text-main);
   border: 1px solid var(--border-color);
+  z-index: 10;
 }
 
 .floating-card.c1 {
