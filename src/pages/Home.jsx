@@ -53,14 +53,8 @@ function Home() {
               <Link to="/grammar" className="btn-secondary lg">Try Grammar Tool</Link>
             </div>
           </div>
-          <div className="hero-visual-container">
-            <div className="floating-card c1">
-              <MessageSquare size={20} /> <span>How can I help?</span>
-            </div>
-            <div className="floating-card c2">
-              <div className="dot"></div> <span>AI is analyzing...</span>
-            </div>
-            <img src="/images/ai-agent.png" alt="AI Agent" className="hero-ai-image animate-float" />
+          <div className="hero-visual-scene animate-fade">
+            <img src="/images/ai-agent-v2.png" alt="AI Agent Professional" className="hero-main-image" />
           </div>
         </section>
 

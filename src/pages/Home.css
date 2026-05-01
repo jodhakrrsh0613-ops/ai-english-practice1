@@ -43,23 +43,27 @@
 }
 
 /* Hero Visual */
-.hero-visual-container {
+.hero-visual-scene {
   position: relative;
+  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 400px;
 }
 
-.hero-ai-image {
-  width: 350px;
+.hero-main-image {
+  width: 100%;
+  max-width: 600px;
   height: auto;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  transition: transform 0.5s ease;
   z-index: 1;
-  filter: drop-shadow(0 20px 50px rgba(124, 58, 237, 0.3));
 }
 
-.animate-float {
-  animation: float 6s infinite ease-in-out;
+.hero-main-image:hover {
+  transform: scale(1.02);
 }
 
 @keyframes blobMorph {
@@ -211,7 +215,7 @@
   .hero-actions {
     justify-content: center;
   }
-  .hero-visual-container {
+  .hero-visual-scene {
     display: none;
   }
   .hero-title {
