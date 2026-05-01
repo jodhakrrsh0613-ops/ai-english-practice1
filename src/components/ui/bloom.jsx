@@ -6,7 +6,7 @@ export function NestedSquares({ className = "" }) {
   const squares = Array.from({ length: 25 }, (_, i) => i);
 
   return (
-    <div className={cn("relative w-96 h-96 flex items-center justify-center bg-background", className)}>
+    <div className={cn("relative w-96 h-96 flex items-center justify-center", className)}>
       {squares.map((index) => {
         const padding = (index + 1) * 10;
         const delay = index * 0.1;
