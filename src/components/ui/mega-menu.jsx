@@ -14,7 +14,7 @@ const MegaMenu = React.forwardRef(({ items, className, ...props }, ref) => {
   return (
     <ul
       ref={ref}
-      className={`relative flex items-center gap-8 ${className || ""}`}
+      className={`relative flex items-center gap-10 ${className || ""}`}
       {...props}
     >
       {items.map((navItem) => (
@@ -27,7 +27,7 @@ const MegaMenu = React.forwardRef(({ items, className, ...props }, ref) => {
           {navItem.link ? (
             <Link
               to={navItem.link}
-              className="relative flex cursor-pointer items-center justify-center gap-1.5 py-3.5 px-8 text-[1.05rem] font-semibold transition-all duration-300 hover:text-indigo-500 hover:scale-105 group"
+              className="relative flex cursor-pointer items-center justify-center gap-2 py-3 px-9 text-[1.05rem] font-semibold transition-all duration-250 ease-in-out hover:text-indigo-500 hover:scale-105 group"
               onMouseEnter={() => setIsHover(navItem.id)}
               onMouseLeave={() => setIsHover(null)}
               style={{ color: 'var(--text-main)' }}
@@ -39,14 +39,14 @@ const MegaMenu = React.forwardRef(({ items, className, ...props }, ref) => {
                   className="absolute inset-0 size-full"
                   style={{
                     borderRadius: 12,
-                    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.06)',
                   }}
                 />
               )}
             </Link>
           ) : (
             <button
-              className="relative flex cursor-pointer items-center justify-center gap-1.5 py-3.5 px-8 text-[1.05rem] font-semibold transition-all duration-300 hover:text-indigo-500 hover:scale-105 group"
+              className="relative flex cursor-pointer items-center justify-center gap-2 py-3 px-9 text-[1.05rem] font-semibold transition-all duration-250 ease-in-out hover:text-indigo-500 hover:scale-105 group"
               onMouseEnter={() => setIsHover(navItem.id)}
               onMouseLeave={() => setIsHover(null)}
               style={{ color: 'var(--text-main)' }}
@@ -54,7 +54,7 @@ const MegaMenu = React.forwardRef(({ items, className, ...props }, ref) => {
               <span>{navItem.label}</span>
               {navItem.subMenus && (
                 <ChevronDown
-                  className={`h-4.5 w-4.5 opacity-50 transition-transform duration-300 group-hover:rotate-180 ${
+                  className={`h-4.5 w-4.5 opacity-40 transition-transform duration-300 group-hover:rotate-180 ${
                     openMenu === navItem.label ? "rotate-180" : ""
                   }`}
                 />
@@ -65,7 +65,7 @@ const MegaMenu = React.forwardRef(({ items, className, ...props }, ref) => {
                   className="absolute inset-0 size-full"
                   style={{
                     borderRadius: 12,
-                    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.06)',
                   }}
                 />
               )}
