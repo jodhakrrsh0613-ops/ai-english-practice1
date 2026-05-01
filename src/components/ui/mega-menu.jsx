@@ -14,7 +14,7 @@ const MegaMenu = React.forwardRef(({ items, className, ...props }, ref) => {
   return (
     <ul
       ref={ref}
-      className={`relative flex items-center gap-[32px] ${className || ""}`}
+      className={`relative flex items-center gap-[40px] ${className || ""}`}
       {...props}
     >
       {items.map((navItem) => (
@@ -27,7 +27,7 @@ const MegaMenu = React.forwardRef(({ items, className, ...props }, ref) => {
           {navItem.link ? (
             <Link
               to={navItem.link}
-              className="relative flex items-center justify-center min-h-[40px] px-[52px] py-[10px] text-[1rem] font-bold transition-all duration-300 hover:text-indigo-500 hover:scale-[1.05] group cursor-pointer no-underline"
+              className="relative flex items-center justify-center min-h-[44px] px-[100px] py-[12px] text-[1.1rem] font-bold transition-all duration-300 hover:text-indigo-500 hover:scale-[1.05] group cursor-pointer no-underline whitespace-nowrap"
               onMouseEnter={() => setIsHover(navItem.id)}
               onMouseLeave={() => setIsHover(null)}
               style={{ color: 'var(--text-main)' }}
@@ -49,7 +49,7 @@ const MegaMenu = React.forwardRef(({ items, className, ...props }, ref) => {
             </Link>
           ) : (
             <button
-              className="relative flex items-center justify-center min-h-[40px] px-[52px] py-[10px] text-[1rem] font-bold transition-all duration-300 hover:text-indigo-500 hover:scale-[1.05] group cursor-pointer border-none bg-transparent m-0"
+              className="relative flex items-center justify-center min-h-[44px] px-[100px] py-[12px] text-[1.1rem] font-bold transition-all duration-300 hover:text-indigo-500 hover:scale-[1.05] group cursor-pointer border-none bg-transparent m-0 whitespace-nowrap"
               onMouseEnter={() => setIsHover(navItem.id)}
               onMouseLeave={() => setIsHover(null)}
               style={{ color: 'var(--text-main)' }}
@@ -57,7 +57,7 @@ const MegaMenu = React.forwardRef(({ items, className, ...props }, ref) => {
               {navItem.label}
               {navItem.subMenus && (
                 <ChevronDown
-                  className={`h-4 w-4 ml-2 opacity-50 transition-transform duration-300 group-hover:rotate-180 ${
+                  className={`h-4.5 w-4.5 ml-2 opacity-50 transition-transform duration-300 group-hover:rotate-180 ${
                     openMenu === navItem.label ? "rotate-180" : ""
                   }`}
                 />
