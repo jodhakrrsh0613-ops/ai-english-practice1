@@ -14,7 +14,7 @@ const MegaMenu = React.forwardRef(({ items, className, ...props }, ref) => {
   return (
     <ul
       ref={ref}
-      className={`relative flex items-center gap-4 ${className || ""}`}
+      className={`relative flex items-center gap-[20px] ${className || ""}`}
       {...props}
     >
       {items.map((navItem) => (
@@ -27,37 +27,37 @@ const MegaMenu = React.forwardRef(({ items, className, ...props }, ref) => {
           {navItem.link ? (
             <Link
               to={navItem.link}
-              className="relative inline-flex items-center justify-center min-h-[44px] px-6 py-2 text-[1rem] font-bold transition-all duration-300 ease-out hover:text-indigo-500 hover:scale-[1.03] group box-border cursor-pointer no-underline outline-none"
+              className="relative flex items-center justify-center min-h-[40px] px-[20px] py-[10px] text-[1rem] font-bold transition-all duration-300 hover:text-indigo-500 hover:scale-[1.05] group cursor-pointer no-underline"
               onMouseEnter={() => setIsHover(navItem.id)}
               onMouseLeave={() => setIsHover(null)}
               style={{ color: 'var(--text-main)' }}
             >
-              <span className="relative z-10 m-0 p-0 block leading-none">{navItem.label}</span>
+              {navItem.label}
               {(isHover === navItem.id || openMenu === navItem.label) && (
                 <motion.div
                   layoutId="hover-bg"
-                  className="absolute inset-0 w-full h-full z-0"
+                  className="absolute inset-0 z-[-1]"
                   style={{
-                    borderRadius: 9999,
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: 12,
+                    backgroundColor: 'rgba(255, 255, 255, 0.12)',
                   }}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
                 />
               )}
             </Link>
           ) : (
             <button
-              className="relative inline-flex items-center justify-center min-h-[44px] px-6 py-2 text-[1rem] font-bold transition-all duration-300 ease-out hover:text-indigo-500 hover:scale-[1.03] group box-border cursor-pointer border-none bg-transparent outline-none m-0"
+              className="relative flex items-center justify-center min-h-[40px] px-[20px] py-[10px] text-[1rem] font-bold transition-all duration-300 hover:text-indigo-500 hover:scale-[1.05] group cursor-pointer border-none bg-transparent m-0"
               onMouseEnter={() => setIsHover(navItem.id)}
               onMouseLeave={() => setIsHover(null)}
               style={{ color: 'var(--text-main)' }}
             >
-              <span className="relative z-10 m-0 p-0 block leading-none">{navItem.label}</span>
+              {navItem.label}
               {navItem.subMenus && (
                 <ChevronDown
-                  className={`relative z-10 h-4 w-4 ml-1.5 opacity-40 transition-transform duration-300 group-hover:rotate-180 ${
+                  className={`h-4 w-4 ml-2 opacity-50 transition-transform duration-300 group-hover:rotate-180 ${
                     openMenu === navItem.label ? "rotate-180" : ""
                   }`}
                 />
@@ -65,14 +65,14 @@ const MegaMenu = React.forwardRef(({ items, className, ...props }, ref) => {
               {(isHover === navItem.id || openMenu === navItem.label) && (
                 <motion.div
                   layoutId="hover-bg"
-                  className="absolute inset-0 w-full h-full z-0"
+                  className="absolute inset-0 z-[-1]"
                   style={{
-                    borderRadius: 9999,
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: 12,
+                    backgroundColor: 'rgba(255, 255, 255, 0.12)',
                   }}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
                 />
               )}
             </button>
