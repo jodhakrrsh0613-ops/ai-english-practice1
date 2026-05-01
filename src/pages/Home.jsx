@@ -60,7 +60,7 @@ function Home() {
             <div className="floating-card c2">
               <div className="dot"></div> <span>AI is analyzing...</span>
             </div>
-            <img src="https://cdn.pixabay.com/photo/2024/03/04/17/10/ai-generated-8612733_640.jpg" alt="AI Agent Visual" className="hero-main-image" />
+            <img src="https://img.freepik.com/free-photo/technology-integrated-everyday-life_23-2151887052.jpg?semt=ais_hybrid&w=740&q=80" alt="AI Integrated Technology" className="hero-main-image circular" />
           </div>
         </section>
 

@@ -53,17 +53,19 @@
 
 .hero-main-image {
   width: 100%;
-  max-width: 450px;
-  height: auto;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  transition: transform 0.5s ease;
+  max-width: 400px;
+  aspect-ratio: 1/1;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 4px solid var(--primary-light);
+  box-shadow: 0 0 30px rgba(124, 58, 237, 0.4);
+  transition: transform 0.5s ease, box-shadow 0.3s ease;
   z-index: 1;
 }
 
 .hero-main-image:hover {
-  transform: scale(1.02);
+  transform: scale(1.05);
+  box-shadow: 0 0 50px rgba(124, 58, 237, 0.6);
 }
 
 @keyframes blobMorph {
