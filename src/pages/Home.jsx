@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { MessageSquare, Mic, BookOpen, Search, BarChart3, ArrowRight } from 'lucide-react';
-import { NestedSquares } from '../components/ui/bloom';
+import ShaderBackground from '../components/ui/shader-background';
 import './Home.css';
 
 function Home() {
@@ -37,10 +37,7 @@ function Home() {
 
   return (
     <div className="home-page animate-fade relative overflow-hidden">
-      {/* Background Animation - Centered as requested */}
-      <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-0">
-        <NestedSquares className="m-auto opacity-30" />
-      </div>
+      <ShaderBackground />
 
       <div className="relative z-10">
         <section className="hero-section">
