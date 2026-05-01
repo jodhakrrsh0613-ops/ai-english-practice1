@@ -37,9 +37,9 @@ function Home() {
 
   return (
     <div className="home-page animate-fade relative overflow-hidden">
-      {/* Background Animation - Shifted up and to the left */}
+      {/* Background Animation - Centered as requested */}
       <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-0">
-        <NestedSquares className="-translate-x-[20%] -translate-y-[15%] opacity-30" />
+        <NestedSquares className="m-auto opacity-30" />
       </div>
 
       <div className="relative z-10">
