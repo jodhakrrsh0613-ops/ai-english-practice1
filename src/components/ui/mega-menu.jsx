@@ -14,6 +14,7 @@ const MegaMenu = React.forwardRef(({ items, className, ...props }, ref) => {
     <ul
       ref={ref}
       className={`relative flex items-center gap-8 ${className || ""}`}
+      style={{ fontFamily: "'Playfair Display', serif" }}
       {...props}
     >
       {items.map((navItem) => (

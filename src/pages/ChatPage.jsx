@@ -63,8 +63,12 @@ function ChatPage() {
   useEffect(() => {
     const saved = loadSessions();
     setSessions(saved);
-    // Auto-start a new session
-    createNewSession(saved);
+    // If sessions exist, load the most recent one instead of creating a new one
+    if (saved.length > 0) {
+      loadSession(saved[0]);
+    } else {
+      createNewSession(saved);
+    }
   }, []);
 
   // Auto-save current session whenever messages change
